@@ -8,7 +8,7 @@ an active consent grant so the clinician path can be demonstrated end to end.
     python -m backend.seed_demo [--days 75] [--reset]
 
 The generated sessions are SYNTHETIC. They exist to demonstrate the pipeline,
-not to evidence anything about a real person — see docs/ground_truth_strategy.md.
+not to evidence anything about a real person, see docs/ground_truth_strategy.md.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ HOURS = [9, 11, 14, 16, 20]
 
 def _synth_batch(rng, day: date, hour: int, drift: float, degraded: bool) -> dict:
     """One 60-second batch. `drift` 0..1 scales a mild adverse shift."""
-    # Personal baseline constants — this is "Tiya's" normal.
+    # Personal baseline constants, this is "Tiya's" normal.
     wpm = 62.0 - 9.0 * drift
     iki = 178.0 + 46.0 * drift
     hold = 88.0 + 9.0 * drift
@@ -173,7 +173,7 @@ def main(days: int = 75, reset: bool = False) -> None:
         "SELECT COUNT(*) AS n FROM keystroke_sessions WHERE user_id = ?", (user["id"],)
     )
     if existing and existing["n"] > 0 and not reset:
-        print(f"{USER['username']} already has {existing['n']} sessions — "
+        print(f"{USER['username']} already has {existing['n']} sessions, "
               f"pass --reset to regenerate.")
         return
 
@@ -185,10 +185,10 @@ def main(days: int = 75, reset: bool = False) -> None:
         day = today - timedelta(days=offset - 1)
 
         # Baseline period is flat. A gradual, mild adverse shift begins in the
-        # final third — the sort of change CogniDiff exists to notice.
+        # final third, the sort of change CogniDiff exists to notice.
         progress = max(0.0, (days - offset - days * 0.62) / (days * 0.38))
         # Kept mild on purpose. The demo should land in the graded MONITOR /
-        # SIGNIFICANT band, not slam into the red — a tool that only ever
+        # SIGNIFICANT band, not slam into the red, a tool that only ever
         # demonstrates its most alarming state teaches the wrong thing about it.
         drift = float(np.clip(progress, 0, 1)) * 0.38
 
@@ -233,7 +233,7 @@ def main(days: int = 75, reset: bool = False) -> None:
     for r in rows:
         # Score up to three sessions per day rather than just the last one. A
         # daily figure resting on a single session swings wildly whenever that
-        # session happened to be a distracted one — the dashboard then shows a
+        # session happened to be a distracted one, the dashboard then shows a
         # cliff that means nothing. Averaging the day is both steadier and a
         # more honest summary of it.
         sessions = db.query(

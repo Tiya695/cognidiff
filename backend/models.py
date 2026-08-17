@@ -4,7 +4,7 @@ Every model here sets ``extra="forbid"``. That single line is what makes
 Attack 6 (typed-text injection) and Attack 12 (score manipulation) return 422
 instead of quietly succeeding: a client that sends `raw_text`, `cogni_score`,
 `adjusted_score` or `anomaly` is rejected outright rather than having the field
-silently ignored — because a silently ignored field is a field someone will
+silently ignored, because a silently ignored field is a field someone will
 eventually find a way to make count.
 
 Ranges are not decoration either. `total_keystrokes` cannot exceed 10,000 in a

@@ -4,7 +4,7 @@ This is the only place a CogniScore is produced, and it runs **server-side
 only**. There is no endpoint anywhere in CogniDiff that accepts a score from a
 client. The client sends behavioural features; the server derives everything
 else from stored data. The score is the most valuable asset in the system, so it
-must be unforgeable — that property is what Attack 12 tests.
+must be unforgeable, that property is what Attack 12 tests.
 """
 
 from __future__ import annotations
@@ -98,7 +98,7 @@ def _agreement_score(user_id: str, sessions: list[dict]) -> float:
     baseline = PersonalBaseline.load(user_id)
     detector = AnomalyDetector.load(user_id)
     if baseline is None or detector is None or not detector.is_fitted:
-        return 50.0                       # can't tell — neutral, not confident
+        return 50.0                       # can't tell, neutral, not confident
 
     agree = 0
     for s in sessions:
@@ -161,7 +161,7 @@ def score_user(
         return {
             "status": "INSUFFICIENT_DATA",
             "message": (
-                f"Building your baseline — {len(good)} of {MIN_BASELINE_SESSIONS} "
+                f"Building your baseline, {len(good)} of {MIN_BASELINE_SESSIONS} "
                 f"quality sessions collected."
             ),
             "cogni_score": None,
@@ -281,7 +281,7 @@ def score_user(
 def _composite(user_id: str, day: str, keystroke_score: float) -> dict:
     """Blend passive keystroke monitoring with today's active mini-tasks.
 
-    Keystroke-only when no task scores exist for the day — an absent task is not
+    Keystroke-only when no task scores exist for the day, an absent task is not
     a zero.
     """
     row = db.query_one(
@@ -329,7 +329,7 @@ def _trend_direction(user_id: str, days: int = 30) -> str:
 
 
 def _persist(user_id: str, day: str, result: dict) -> int:
-    """Write the score. Only this function writes to cogniscores — there is no
+    """Write the score. Only this function writes to cogniscores, there is no
     endpoint that updates a score directly."""
     return db.insert("cogniscores", {
         "user_id": user_id,
@@ -363,7 +363,7 @@ def _baseline_window(sessions: list[dict], recent: bool) -> list[dict]:
     """Select the sessions the baseline is fitted on.
 
     Initial fit takes the FIRST `BASELINE_WINDOW_DAYS` days; a deliberate refit
-    takes the LAST. Never everything — a baseline fitted over the whole history
+    takes the LAST. Never everything, a baseline fitted over the whole history
     quietly absorbs any gradual change and redefines it as this person's normal,
     which would make the one signal CogniDiff exists to find undetectable.
     """
@@ -374,7 +374,7 @@ def _baseline_window(sessions: list[dict], recent: bool) -> list[dict]:
     window = dates[-BASELINE_WINDOW_DAYS:] if recent else dates[:BASELINE_WINDOW_DAYS]
     selected = [s for s in sessions if s.get("date") in set(window)]
 
-    # If the window is too thin to fit, widen it rather than refuse — an
+    # If the window is too thin to fit, widen it rather than refuse, an
     # under-populated fortnight is common early on.
     if len(selected) < MIN_BASELINE_SESSIONS:
         return sessions[-MIN_BASELINE_SESSIONS * 2:] if recent else sessions[:MIN_BASELINE_SESSIONS * 2]
@@ -385,8 +385,7 @@ def fit_baseline(user_id: str, recent: bool = False) -> dict:
     """Fit (or refit) the personal baseline and bump its version.
 
     `recent=False` establishes the baseline from the first two weeks.
-    `recent=True` is a deliberate recalibration onto the most recent two weeks —
-    used after a device change, an illness, or a major life change.
+    `recent=True` is a deliberate recalibration onto the most recent two weeks, used after a device change, an illness, or a major life change.
     """
     user = db.get_user(user_id)
     if user is None:

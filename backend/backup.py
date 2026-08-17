@@ -8,7 +8,7 @@ Two details that are easy to get wrong and expensive to get wrong:
 
   * Backups use ``sqlite3.Connection.backup()``, never a file copy. Copying a
     live SQLite file can capture it mid-write and produce a backup that restores
-    to a corrupted database — and you find out at the worst possible moment.
+    to a corrupted database, and you find out at the worst possible moment.
 
   * An untested backup is not a backup. ``verify_restore()`` exists so the
     restore path is exercised, not assumed.
@@ -48,7 +48,7 @@ class BackupError(RuntimeError):
 
 def _cipher():
     if not HAS_CRYPTO:
-        raise BackupError("cryptography is not installed — cannot encrypt backups.")
+        raise BackupError("cryptography is not installed, cannot encrypt backups.")
     if not BACKUP_KEY:
         raise BackupError(
             "BACKUP_KEY is not set. Generate one with:\n"
@@ -114,7 +114,7 @@ def _taken_at(path: Path) -> datetime:
 def apply_retention() -> list[Path]:
     """Keep the last 7 daily and 4 weekly backups; delete the rest.
 
-    Retention is not only a disk-space policy — it is half of the deletion
+    Retention is not only a disk-space policy, it is half of the deletion
     promise. See docs/backup_recovery.md.
     """
     backups = list_backups()
@@ -156,7 +156,7 @@ def restore_backup(
     replay_deletions_on_restore: bool = True,
 ) -> Path:
     """Decrypt and restore. The existing database is moved aside, never
-    overwritten in place — a failed restore must not also destroy what was
+    overwritten in place, a failed restore must not also destroy what was
     there."""
     source = BACKUP_DIR / name if not Path(name).is_absolute() else Path(name)
     if not source.exists():
@@ -213,12 +213,12 @@ def verify_restore(name: str | None = None) -> dict:
     scratch = BACKUP_DIR / ".verify.db"
     scratch.unlink(missing_ok=True)
     # Verification compares the backup against live as-taken, so the deletion
-    # replay is skipped here — it would make the row counts differ by design.
+    # replay is skipped here, it would make the row counts differ by design.
     restore_backup(chosen.name, target=scratch, replay_deletions_on_restore=False)
 
     # Literal statements rather than a loop over interpolated table names, so
-    # there is no string-built SQL anywhere in the project for a scanner — or a
-    # reviewer — to have to reason about.
+    # there is no string-built SQL anywhere in the project for a scanner, or a
+    # reviewer, to have to reason about.
     COUNT_QUERIES = (
         ("users",              "SELECT COUNT(*) FROM users"),
         ("keystroke_sessions", "SELECT COUNT(*) FROM keystroke_sessions"),
@@ -290,7 +290,7 @@ def main() -> int:
             print(f"backup   {result['backup']}")
             print(f"readable {result['readable']}")
             for table, n in result["restored_counts"].items():
-                live = result["live_counts"].get(table, "—")
+                live = result["live_counts"].get(table, ",")
                 flag = "" if live == n else "   <- differs from live"
                 print(f"  {table:<22} restored {n:>6}   live {live}{flag}")
 

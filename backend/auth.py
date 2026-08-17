@@ -1,9 +1,9 @@
-"""Authentication — JWT issuing and verification.
+"""Authentication, JWT issuing and verification.
 
 The rule that everything else depends on: **the server decides who the user
 is.** Identity comes from a signed token, never from a URL parameter, a query
 string or a request body. That single decision is what closes the IDOR hole
-(Phase 6, Attack 1) — there is no longer a `user_id` in the URL for an attacker
+(Phase 6, Attack 1), there is no longer a `user_id` in the URL for an attacker
 to change.
 
 Tokens carry a `tv` (token version) claim. Bumping a user's `token_version`
@@ -13,7 +13,7 @@ incident response procedure.
 `python-jose` and `passlib` are used when installed. Both have stdlib fallbacks
 (HMAC-SHA256 for JWT, PBKDF2-SHA256 for passwords) so authentication never
 silently degrades to something weaker on a machine where the wheels failed to
-build — the fallback is a real implementation, not a stub.
+build, the fallback is a real implementation, not a stub.
 """
 
 from __future__ import annotations
@@ -215,7 +215,7 @@ def authenticate(username: str, password: str) -> Optional[dict]:
 
     A missing user still runs a hash comparison against a dummy value, so the
     response time does not reveal whether the username exists. The caller
-    returns one generic message for both failure modes — otherwise the login
+    returns one generic message for both failure modes, otherwise the login
     endpoint is a user-enumeration oracle.
     """
     user = db.get_user_by_username(username)

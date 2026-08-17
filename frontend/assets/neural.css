@@ -5,6 +5,39 @@
    report so the whole product reads as one instrument.
    ========================================================================== */
 
+/* ==========================================================================
+   fonts, self-hosted
+   Poppins for display and body: geometric, single-storey g, circular dots,
+   which is the face the reference scan uses. JetBrains Mono for the HUD.
+   Vendored rather than loaded from a CDN, so there is no third-party host in
+   the request path and the app works offline.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("../vendor/fonts/Poppins-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("../vendor/fonts/Poppins-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("../vendor/fonts/Poppins-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 700;
+  font-display: swap; src: url("../vendor/fonts/Poppins-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("../vendor/fonts/JetBrainsMono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("../vendor/fonts/JetBrainsMono-500.woff2") format("woff2");
+}
+
 :root {
   /* --- field ------------------------------------------------------------ */
   --bg-deep:    #04091c;
@@ -41,7 +74,7 @@
 
   /* --- type ------------------------------------------------------------- */
   --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
-  --sans: "Segoe UI Variable Display", "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+  --sans: "Poppins", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   --step: clamp(11px, .78vw, 13px);
   --radius: 12px;
@@ -67,7 +100,7 @@ body {
 
 /* The galaxy field. Two coloured glows over a vertical gradient, exactly the
    deep-navy-with-a-blue-bloom look of the reference scan. */
-.field {
+.cosmos {
   position: fixed;
   inset: 0;
   z-index: -2;
@@ -87,8 +120,58 @@ body {
 }
 
 /* ==========================================================================
+   cursor
+   ========================================================================== */
+
+.cursor-glow, .cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .35s ease, width .25s ease, height .25s ease,
+              border-color .25s ease;
+  will-change: transform;
+}
+.cursor-glow.is-on, .cursor-ring.is-on { opacity: 1; }
+
+.cursor-glow {
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(96, 190, 255, .17) 0%,
+    rgba(56, 189, 248, .09) 34%,
+    rgba(26, 79, 208, .04) 58%,
+    transparent 72%);
+  mix-blend-mode: screen;
+}
+
+.cursor-ring {
+  width: 26px; height: 26px;
+  border: 1px solid rgba(127, 216, 255, .55);
+  border-radius: 50%;
+  box-shadow: 0 0 12px -2px rgba(127, 216, 255, .5),
+              inset 0 0 8px -4px rgba(127, 216, 255, .6);
+}
+.cursor-ring.is-hot {
+  width: 46px; height: 46px;
+  border-color: rgba(168, 230, 255, .9);
+  box-shadow: 0 0 22px -2px rgba(127, 216, 255, .75),
+              inset 0 0 12px -4px rgba(127, 216, 255, .8);
+}
+
+@media (pointer: coarse) {
+  .cursor-glow, .cursor-ring { display: none; }
+}
+
+/* ==========================================================================
    accessibility primitives
    ========================================================================== */
+
+/* The `hidden` attribute is only a UA default of `display:none`, so any class
+   rule that sets `display` silently defeats it. Toggling visibility is too
+   important to lose to specificity. */
+[hidden] { display: none !important; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px;
@@ -132,10 +215,12 @@ body {
 }
 @keyframes blink { 0%, 50% { opacity: .5 } 51%, 100% { opacity: 0 } }
 
-h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 1.08; }
+/* Poppins runs wide and light for its weight, so headings take 700 and tighter
+   tracking to sit like the reference. */
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.028em; line-height: 1.06; }
 
 .display {
-  font-size: clamp(2.1rem, 5.2vw, 4.05rem);
+  font-size: clamp(2.05rem, 5vw, 3.85rem);
   max-width: 15ch;
   text-wrap: balance;
 }
@@ -290,30 +375,13 @@ h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 
   background: rgba(26, 79, 208, .3);
 }
 
-/* step indicator */
-.steps {
-  position: fixed; z-index: 40;
-  bottom: 26px; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 1.15rem;
-  margin: 0; padding: 0; list-style: none;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em;
-}
-.steps li { position: relative; color: var(--faint); opacity: .5; transition: opacity .3s, color .3s; }
-.steps li::before {
-  content: ""; position: absolute;
-  top: -9px; left: 50%; transform: translateX(-50%) scaleX(0);
-  width: 17px; height: 1px;
-  background: var(--cyan);
-  transition: transform .35s ease;
-}
-.steps li[aria-current="step"] { color: var(--cyan); opacity: 1; }
-.steps li[aria-current="step"]::before { transform: translateX(-50%) scaleX(1); }
 
 /* ==========================================================================
    buttons, badges, links
    ========================================================================== */
 
 .btn {
+  position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: .6em;
   padding: .82rem 1.5rem;
   border: 1px solid var(--line-hot);
@@ -324,18 +392,49 @@ h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 
   letter-spacing: .18em; text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
-  transition: background .2s, border-color .2s, color .2s, transform .12s;
+  overflow: hidden;
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0),
+              0 6px 22px -14px rgba(0, 0, 0, .9);
+  transition: background .22s, border-color .22s, color .22s,
+              transform .12s, box-shadow .32s;
 }
+
+/* The glow: a soft cyan bloom outside the pill plus a sheen that sweeps across
+   it on hover. */
+.btn::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg,
+    transparent 20%, rgba(168, 230, 255, .28) 48%, transparent 76%);
+  transform: translateX(-130%);
+  transition: transform .62s cubic-bezier(.22, .8, .3, 1);
+  pointer-events: none;
+}
+.btn:hover::before, .btn:focus-visible::before { transform: translateX(130%); }
+
 .btn:hover {
   background: rgba(56, 189, 248, .3);
   border-color: var(--cyan);
   color: #fff;
+  box-shadow: 0 0 26px -4px rgba(56, 189, 248, .55),
+              0 0 60px -18px rgba(56, 189, 248, .5),
+              0 6px 22px -14px rgba(0, 0, 0, .9);
 }
 .btn:active { transform: translateY(1px); }
 .btn--ghost { background: transparent; border-color: var(--line); }
 .btn--ghost:hover { background: rgba(26, 79, 208, .22); }
-.btn--solid { background: var(--cyan); border-color: var(--cyan); color: #04091c; font-weight: 600; }
-.btn--solid:hover { background: #a8e6ff; border-color: #a8e6ff; color: #04091c; }
+.btn--solid {
+  background: var(--cyan); border-color: var(--cyan);
+  color: #04091c; font-weight: 600;
+  box-shadow: 0 0 22px -6px rgba(127, 216, 255, .7),
+              0 6px 22px -14px rgba(0, 0, 0, .9);
+}
+.btn--solid:hover {
+  background: #a8e6ff; border-color: #a8e6ff; color: #04091c;
+  box-shadow: 0 0 34px -2px rgba(127, 216, 255, .85),
+              0 0 74px -16px rgba(56, 189, 248, .6);
+}
 .btn--danger { color: var(--red); border-color: rgba(255, 122, 138, .38); background: transparent; }
 .btn--danger:hover { background: rgba(255, 122, 138, .16); border-color: var(--red); color: #fff; }
 .btn[disabled] { opacity: .45; cursor: not-allowed; }

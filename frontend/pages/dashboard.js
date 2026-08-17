@@ -1,7 +1,7 @@
 /* CogniDiff dashboard.
  *
  * Every value from the API is written with textContent. Nothing here builds
- * markup from a server string — a hostile value stored in the database renders
+ * markup from a server string, a hostile value stored in the database renders
  * as visible characters and never executes (Phase 6, Attack 8).
  */
 
@@ -40,7 +40,7 @@
     const score = d.current_score;
 
     if (score == null) {
-      $('scoreNum').textContent = '—';
+      $('scoreNum').textContent = ',';
       $('scoreExplain').textContent = d.message ||
         'Not enough quality sessions yet to produce a score.';
       return;
@@ -53,10 +53,10 @@
     badge.className = 'badge badge--' +
       (band === 'HIGH' ? 'green' : band === 'MODERATE' ? 'yellow' : 'orange');
     $('confText').textContent =
-      `CONFIDENCE ${conf == null ? '—' : Math.round(conf) + '%'} (${band})`;
+      `CONFIDENCE ${conf == null ? ',' : Math.round(conf) + '%'} (${band})`;
 
     $('scoreExplain').textContent = d.provisional
-      ? 'This reading is provisional — there is not enough evidence today for a firm result, so no alert is raised from it.'
+      ? 'This reading is provisional, there is not enough evidence today for a firm result, so no alert is raised from it.'
       : '100 means today matches your own baseline exactly. This is never compared against anybody else.';
 
     $('mRaw').textContent = fmt(d.raw_score);
@@ -65,26 +65,26 @@
       : fmt(d.adjusted_score);
     $('mBlend').textContent = d.task_score == null
       ? 'keystroke only' : `${d.composite_weighting}`;
-    $('mDev').textContent = d.raw_score == null ? '—' : `${fmt(d.deviation_percent)}%`;
+    $('mDev').textContent = d.raw_score == null ? ',' : `${fmt(d.deviation_percent)}%`;
 
     const p = d.lstm_prediction_tomorrow || {};
     $('mPredict').textContent = p.predicted_score == null
-      ? '—' : `${p.predicted_score} (${p.trend || 'unknown'})`;
+      ? ',' : `${p.predicted_score} (${p.trend || 'unknown'})`;
 
     const dc = d.dual_confirmation || {};
     $('mAgree').textContent = ({
       BOTH_AGREE_NORMAL: 'both models: normal',
       BOTH_AGREE_ANOMALOUS: 'both models: unusual',
       MODELS_DISAGREE: 'models disagree',
-    })[dc.agreement] || '—';
+    })[dc.agreement] || ',';
 
     const v = d.versions || {};
     $('versionFoot').textContent =
-      `MODEL ${v.model_version || '—'} · BASELINE v${d.user?.baseline_version ?? '—'} · ` +
-      `FEATURES ${v.feature_schema_version || '—'} · COMMIT ${v.code_commit || '—'}`;
+      `MODEL ${v.model_version || ','} · BASELINE v${d.user?.baseline_version ?? ','} · ` +
+      `FEATURES ${v.feature_schema_version || ','} · COMMIT ${v.code_commit || ','}`;
   }
 
-  const fmt = (n) => (n == null ? '—' : Number(n).toFixed(1));
+  const fmt = (n) => (n == null ? ',' : Number(n).toFixed(1));
 
   function renderDrift(d) {
     const drift = d.drift || {};
@@ -95,7 +95,7 @@
       const r = drift.recalibration || {};
       banner.hidden = false;
       $('driftText').textContent =
-        `Recalibrating to your new setup — scores are provisional and no alerts ` +
+        `Recalibrating to your new setup, scores are provisional and no alerts ` +
         `will be raised until your new baseline is established. ` +
         `${r.sessions_collected ?? 0} of ${r.sessions_required ?? 30} clean sessions collected.`;
       return;
@@ -106,7 +106,7 @@
       banner.className = 'banner banner--yellow';
       $('driftText').textContent =
         'A steady shift with no device or environment change to explain it. ' +
-        'This is not recalibrated away — it is exactly what CogniDiff watches for. ' +
+        'This is not recalibrated away, it is exactly what CogniDiff watches for. ' +
         'Keep monitoring and review the trend with a professional if it persists.';
       return;
     }
@@ -155,7 +155,7 @@
 
       const value = document.createElement('span');
       value.className = 'changes__pct';
-      value.textContent = pct == null ? '—' : `${pct > 0 ? '+' : ''}${Math.round(pct)}%`;
+      value.textContent = pct == null ? ',' : `${pct > 0 ? '+' : ''}${Math.round(pct)}%`;
       li.appendChild(value);
 
       const bar = document.createElement('span');
@@ -174,10 +174,10 @@
   }
 
   function renderQuality(d) {
-    $('qAnalysed').textContent = d.sessions_analysed ?? '—';
-    $('qExcluded').textContent = d.sessions_excluded_quality ?? '—';
+    $('qAnalysed').textContent = d.sessions_analysed ?? ',';
+    $('qExcluded').textContent = d.sessions_excluded_quality ?? ',';
     $('qRate').textContent = d.exclusion_rate_percent == null
-      ? '—' : `${d.exclusion_rate_percent}%`;
+      ? ',' : `${d.exclusion_rate_percent}%`;
     $('qBaseline').textContent =
       `${d.confidence_breakdown ? Math.round((d.confidence_breakdown.baseline_size / 100) * 30) : 0}`;
 
@@ -199,7 +199,7 @@
       for (const [text, cls] of [[r.reason_code, ''], [r.description, ''], [r.n, 'num']]) {
         const td = document.createElement('td');
         td.className = cls;
-        td.textContent = text ?? '—';
+        td.textContent = text ?? ',';
         tr.appendChild(td);
       }
       tbody.appendChild(tr);
@@ -334,7 +334,7 @@
       }
       $('ctxUnwell').checked = Boolean(context.feeling_unwell);
       $('ctxDevice').checked = Boolean(context.device_changed);
-    } catch { /* no context yet — leave the form blank */ }
+    } catch { /* no context yet, leave the form blank */ }
   }
 
   $('contextForm').addEventListener('submit', async (e) => {
@@ -380,8 +380,8 @@
     toast($('actionToast'), 'Refitting your baseline and detector…');
     try {
       const b = await api.refitBaseline();
-      try { await api.fitAnomaly(); } catch { /* needs more sessions — fine */ }
-      try { await api.fitLstm(); } catch { /* needs more days — fine */ }
+      try { await api.fitAnomaly(); } catch { /* needs more sessions, fine */ }
+      try { await api.fitLstm(); } catch { /* needs more days, fine */ }
       toast($('actionToast'),
         `Baseline v${b.baseline_version} fitted on ${b.sessions_used} sessions.`);
       load();

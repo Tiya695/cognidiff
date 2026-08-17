@@ -2,7 +2,7 @@
 
 Every query in this module uses parameterised placeholders. There is no
 f-string SQL and no string concatenation with user input anywhere in the
-project — that is what makes Attack 7 (SQL injection) a non-event.
+project, that is what makes Attack 7 (SQL injection) a non-event.
 """
 
 from __future__ import annotations
@@ -167,7 +167,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_user ON security_audit_log(user_id, id DESC
 -- makes the deletion promise survive a restore. A backup taken before the
 -- request still contains the user's rows, so every restore replays this ledger
 -- before the database goes back into service. See docs/backup_recovery.md.
--- It holds a user id and a timestamp — no health data.
+-- It holds a user id and a timestamp, no health data.
 CREATE TABLE IF NOT EXISTS deletion_requests (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id      TEXT NOT NULL,
@@ -239,7 +239,7 @@ def init_db() -> None:
 
 
 # --------------------------------------------------------------------------
-# generic helpers — all parameterised
+# generic helpers, all parameterised
 # --------------------------------------------------------------------------
 
 def query(sql: str, params: Iterable[Any] = ()) -> list[dict]:
@@ -270,8 +270,7 @@ def _columns_of(table: str) -> frozenset[str]:
 def insert(table: str, data: dict) -> int:
     """Insert a row.
 
-    Values always go through placeholders. The table and column names cannot —
-    SQL has no parameter form for identifiers — so both are validated against
+    Values always go through placeholders. The table and column names cannot, SQL has no parameter form for identifiers, so both are validated against
     the live schema before they are interpolated. That turns "these are literals
     at every call site, trust us" into something the database itself checks, and
     it is why bandit's B608 on this line is an accepted finding rather than an
@@ -320,7 +319,7 @@ def good_sessions(user_id: str, limit: Optional[int] = None) -> list[dict]:
     burst or a laggy batch must never be able to move someone's score.
     """
     # id is the tiebreak throughout. created_at has one-second resolution, so
-    # several sessions ingested in the same second tie — and SQLite is free to
+    # several sessions ingested in the same second tie, and SQLite is free to
     # return tied rows in any order, which would make "the latest session"
     # non-deterministic.
     sql = (
@@ -348,8 +347,7 @@ def latest_session(user_id: str) -> Optional[dict]:
     """The most recent quality-passing session.
 
     Ordered by date first, then arrival. Ordering by arrival alone would let a
-    batch that was uploaded late — an extension flushing its offline queue —
-    masquerade as today's reading.
+    batch that was uploaded late, an extension flushing its offline queue, masquerade as today's reading.
     """
     return query_one(
         "SELECT * FROM keystroke_sessions WHERE user_id = ? AND excluded = 0 "
@@ -397,8 +395,8 @@ def has_active_consent(user_id: str, doctor_id: str) -> bool:
 
 
 #: Every table holding a user's data, as literal statements rather than a loop
-#: over interpolated table names. An f-string here would be safe — the names are
-#: constants — but it would also be the only interpolated SQL in the project,
+#: over interpolated table names. An f-string here would be safe, the names are
+#: constants, but it would also be the only interpolated SQL in the project,
 #: and a codebase where "we only interpolate the safe ones" is true is one where
 #: the rule cannot be checked mechanically. test_attack_07c greps for exactly this.
 DELETIONS = (
@@ -427,12 +425,12 @@ def delete_user_data(user_id: str) -> dict[str, int]:
             removed[table] = cur.rowcount
 
         # Scrub health-linked audit rows but keep the accountability trail:
-        # who acted, on what, with what outcome — never the health content.
+        # who acted, on what, with what outcome, never the health content.
         cur.execute(
             "UPDATE security_audit_log SET details = NULL WHERE user_id = ?",
             (user_id,),
         )
-        # Record the request itself. This row is intentionally NOT deleted —
+        # Record the request itself. This row is intentionally NOT deleted:
         # it carries no health data, and it is what lets a restore honour a
         # deletion that happened after the backup was taken.
         cur.execute(

@@ -1,9 +1,9 @@
-/* CogniDiff — content script (privacy-safe keystroke dynamics capture)
+/* CogniDiff, content script (privacy-safe keystroke dynamics capture)
  *
  * HARD RULE, enforced by this file:
  *   The actual character a user types is never read, never stored and never
- *   leaves this function scope. We read `event.key` for exactly one purpose —
- *   to bucket it into a category — and the character itself is discarded on the
+ *   leaves this function scope. We read `event.key` for exactly one purpose,
+ *   to bucket it into a category, and the character itself is discarded on the
  *   next line. No variable in this file ever holds typed text.
  *
  * What we measure is *rhythm*: how long keys are held, how long the gaps
@@ -28,7 +28,7 @@
     /\/login/i, /\/signin/i, /\/sign-in/i, /\/log-in/i, /\/auth/i,
     /\/checkout/i, /\/payment/i, /\/billing/i, /\/reset-password/i,
     /\/forgot-password/i, /\/verify/i, /\/otp/i, /\/2fa/i,
-    // host fragments — banking, payment, health portals
+    // host fragments, banking, payment, health portals
     /bank/i, /paypal/i, /stripe\.com/i, /razorpay/i, /paytm/i, /upi/i,
     /netbanking/i, /insurance/i, /patient/i, /medical/i, /health.*portal/i,
     /aadhaar/i, /uidai/i, /incometax/i,
@@ -42,7 +42,7 @@
     // script and is the most reliable signal available to us here.
     try {
       if (chrome.extension && chrome.extension.inIncognitoContext) return true;
-    } catch (_) { /* API unavailable — fall through to URL checks */ }
+    } catch (_) { /* API unavailable, fall through to URL checks */ }
 
     const url = location.href;
     return BLOCKED_URL_PATTERNS.some((re) => re.test(url));
@@ -69,7 +69,7 @@
     if (SENSITIVE_LABEL.test(label)) return true;
 
     // Any form that contains a password field is treated as an auth form in
-    // its entirety — the username box next to a password box is still auth.
+    // its entirety, the username box next to a password box is still auth.
     const form = el.closest && el.closest('form');
     if (form && form.querySelector('input[type="password"]')) return true;
 
@@ -117,14 +117,14 @@
       holds: [],          // keyup-minus-keydown durations, ms
       lastDownAt: null,
       intervals: [],      // inter-key intervals, ms
-      tainted: false,     // touched a sensitive context — discard, never send
+      tainted: false,     // touched a sensitive context, discard, never send
     };
   }
 
   /** Drop everything collected so far. Used when a sensitive context appears. */
   function discardBuffer(reason) {
     if (buffer.categories.length > 0) {
-      console.debug('[CogniDiff] buffer discarded —', reason);
+      console.debug('[CogniDiff] buffer discarded ,', reason);
     }
     buffer = newBuffer();
     holdOpen.clear();
@@ -139,7 +139,7 @@
 
     if (pageIsSensitive() || elementIsSensitive(event.target)) {
       // A batch that started on a normal page and continued into a checkout
-      // form must never leave the browser. Delete it — do not flush it.
+      // form must never leave the browser. Delete it, do not flush it.
       discardBuffer('sensitive context entered');
       return;
     }
@@ -171,7 +171,7 @@
     if (hold >= 0 && hold < 5_000) buffer.holds.push(hold);
   }
 
-  /** Fires when focus moves — catches tabbing INTO a password field. */
+  /** Fires when focus moves, catches tabbing INTO a password field. */
   function onFocusIn(event) {
     if (!monitoring) return;
     if (elementIsSensitive(event.target)) discardBuffer('focus moved to sensitive field');
@@ -229,7 +229,7 @@
   /**
    * Coarse, non-identifying device signature. Deliberately bucketed: a new
    * keyboard changes typing rhythm far more than a mild cognitive change does,
-   * so we need to know the setup changed — but we never want a hardware serial
+   * so we need to know the setup changed, but we never want a hardware serial
    * or anything that could single out a person.
    */
   function deviceFingerprint() {
@@ -307,7 +307,7 @@
   });
 
   // Flush whatever is pending when the tab goes away, so a real minute of
-  // typing is not silently lost — unless the page is sensitive.
+  // typing is not silently lost, unless the page is sensitive.
   window.addEventListener('pagehide', () => { if (monitoring) flush(); });
 
   sync();

@@ -1,4 +1,4 @@
-/* CogniDiff — four cognitive mini-tasks.
+/* CogniDiff, four cognitive mini-tasks.
  *
  *   1. Word recall     five words for ten seconds, then type them back
  *   2. Reaction time   click the target the instant it lights, five trials
@@ -132,7 +132,7 @@
                            style: 'margin:0 0 1.8rem;color:var(--text-dim)' }, wrap);
     const target = el('button', {
       class: 'task-target',
-      attrs: { type: 'button', 'aria-label': 'Reaction target — click when it lights up' },
+      attrs: { type: 'button', 'aria-label': 'Reaction target, click when it lights up' },
     }, wrap);
     const tally = el('p', { style: 'margin:1.6rem 0 0;font-family:var(--mono);color:var(--faint);letter-spacing:.2em' }, wrap);
 
@@ -180,7 +180,7 @@
       const box = clearStage();
       const wrap = el('div', {}, box);
       const note = el('p', {
-        text: `Round ${round + 1} of ${ROUNDS} — watch the sequence.`,
+        text: `Round ${round + 1} of ${ROUNDS}, watch the sequence.`,
         style: 'margin:0 0 1.6rem;color:var(--text-dim)',
       }, wrap);
 
@@ -243,7 +243,7 @@
 
     const word = sample(SCRAMBLE_POOL, 1)[0];
     let scrambled = word;
-    // Reshuffle until it actually differs — an unscrambled "scramble" is a
+    // Reshuffle until it actually differs, an unscrambled "scramble" is a
     // free point and would quietly inflate the score.
     let guard = 0;
     while (scrambled === word && guard++ < 40) {
@@ -272,7 +272,7 @@
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         if (input.value.trim().toLowerCase() !== word) {
-          feedback.textContent = 'NOT QUITE — TRY AGAIN';
+          feedback.textContent = 'NOT QUITE, TRY AGAIN';
           input.select();
           return;
         }
@@ -298,11 +298,11 @@
     el('p', { text: 'Submitting your results…',
               style: 'color:var(--text-dim)' }, stage);
 
-    $('rRecall').textContent = results.word_recall ?? '—';
-    $('rReaction').textContent = results.reaction_time_ms ? `${results.reaction_time_ms} ms` : '—';
-    $('rPattern').textContent = results.pattern_memory ?? '—';
+    $('rRecall').textContent = results.word_recall ?? ',';
+    $('rReaction').textContent = results.reaction_time_ms ? `${results.reaction_time_ms} ms` : ',';
+    $('rPattern').textContent = results.pattern_memory ?? ',';
     $('rScramble').textContent = results.letter_scramble_ms
-      ? `${(results.letter_scramble_ms / 1000).toFixed(1)} s` : '—';
+      ? `${(results.letter_scramble_ms / 1000).toFixed(1)} s` : ',';
     $('resultsCard').hidden = false;
     $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 

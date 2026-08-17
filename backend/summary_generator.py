@@ -1,7 +1,7 @@
 """Plain-language summaries via the Claude API.
 
 This is the *only* place CogniDiff calls an external model, and it is used
-sparingly — at most once per user per day. All the machine learning runs
+sparingly, at most once per user per day. All the machine learning runs
 locally at zero cost; Claude is the natural-language communication layer, not
 the analysis layer.
 
@@ -10,7 +10,7 @@ changes, and a trend word. No keystroke data, no timing arrays, no identifiers
 beyond a first name the user chose to enter. See docs/privacy_architecture.md.
 
 If the SDK or key is absent, a deterministic local template is used instead and
-the response says `source: "local_template"` — the user is never shown
+the response says `source: "local_template"`, the user is never shown
 machine-generated prose without knowing where it came from.
 """
 
@@ -41,7 +41,7 @@ the user's data looks unusual and even if asked.
 - You note that sleep, stress, illness and a new keyboard commonly explain these \
 changes.
 - If a pattern has persisted for more than two weeks, you recommend a \
-professional evaluation — calmly, once, without urgency language.
+professional evaluation, calmly, once, without urgency language.
 - You never tell the user to worry, and you never tell them not to.
 
 Write 2 to 3 sentences. Second person. Calm, plain, specific. No bullet points, \
@@ -81,7 +81,7 @@ def generate_summary(
     confidence_band: str = "HIGH",
     days_persisted: int = 0,
 ) -> dict:
-    """Return ``{text, source, model}``. Never raises — falls back to a template."""
+    """Return ``{text, source, model}``. Never raises, falls back to a template."""
     if HAS_ANTHROPIC and ANTHROPIC_API_KEY:
         try:
             client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -104,7 +104,7 @@ def generate_summary(
             ).strip()
             if text:
                 return {"text": text, "source": "claude_api", "model": CLAUDE_MODEL}
-        except Exception as exc:  # network, auth, rate limit — degrade quietly
+        except Exception as exc:  # network, auth, rate limit, degrade quietly
             return {
                 **_template(cogni_score, top_3_changes, trend_direction,
                             user_first_name, confidence_band),
@@ -130,17 +130,17 @@ def _template(
 
     if cogni_score >= 80:
         opening = (
-            f"Hi {name} — your typing today looks much like your usual rhythm, "
+            f"Hi {name}, your typing today looks much like your usual rhythm, "
             f"scoring {cogni_score:.0f} out of 100 against your own baseline."
         )
     elif cogni_score >= 60:
         opening = (
-            f"Hi {name} — today's typing sits a little away from your usual "
+            f"Hi {name}, today's typing sits a little away from your usual "
             f"pattern, at {cogni_score:.0f} out of 100."
         )
     else:
         opening = (
-            f"Hi {name} — today's typing differs noticeably from your usual "
+            f"Hi {name}, today's typing differs noticeably from your usual "
             f"pattern, at {cogni_score:.0f} out of 100."
         )
 

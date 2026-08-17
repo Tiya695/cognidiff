@@ -1,8 +1,8 @@
-"""Context awareness — separating "tired" from "changed".
+"""Context awareness, separating "tired" from "changed".
 
 Typing performance is influenced by a lot of things that have nothing to do with
 cognition. A user who slept four hours, is stressed about an exam, and has the
-flu will type measurably worse — and a monitoring tool that reads that as
+flu will type measurably worse, and a monitoring tool that reads that as
 cognitive change is a false-alarm generator.
 
 So the user can optionally tell us. When they do, the raw score is left intact
@@ -18,7 +18,7 @@ from typing import Optional
 from . import database as db
 
 #: Tolerance points added to the raw score when a known non-cognitive factor is
-#: present. Deliberately modest — context should soften a reading, never erase
+#: present. Deliberately modest, context should soften a reading, never erase
 #: it. The values are documented here so the dashboard, the tests and the paper
 #: all quote the same numbers.
 TOLERANCE = {
@@ -103,12 +103,12 @@ class ContextTracker:
         tolerance = min(tolerance, MAX_TOLERANCE)
         adjusted = min(100.0, float(cogni_score) + tolerance)
 
-        # A device change does not get tolerance points — it gets the session
+        # A device change does not get tolerance points, it gets the session
         # pulled out of the trend entirely. Adding points would still let a new
         # keyboard bend the curve; excluding it is the honest handling.
         exclude = bool(context.get("device_changed"))
         if exclude:
-            reasons.append("Different device reported — excluded from trend")
+            reasons.append("Different device reported, excluded from trend")
 
         return {
             "raw_score": round(float(cogni_score), 1),

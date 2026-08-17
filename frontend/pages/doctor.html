@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cognitive Trend Report — CogniDiff</title>
+<title>Cognitive Trend Report · CogniDiff</title>
 <link rel="icon" href="../assets/favicon.png">
 <link rel="stylesheet" href="../assets/neural.css">
 <link rel="stylesheet" href="../assets/app.css">
@@ -11,7 +11,7 @@
 <body>
 
 <a class="skip-link" href="#main">Skip to the report</a>
-<div class="field" aria-hidden="true"></div>
+<div class="cosmos" aria-hidden="true"></div>
 <canvas id="starfield" aria-hidden="true"></canvas>
 
 <header class="appbar no-print">
@@ -53,34 +53,34 @@
     <div class="report-head">
       <div>
         <p class="tag">COGNITIVE&nbsp;TREND&nbsp;REPORT</p>
-        <h1 id="patientName">—</h1>
-        <p style="margin:.5rem 0 0;color:var(--text-dim)" id="monitoringPeriod">—</p>
+        <h1 id="patientName">,</h1>
+        <p style="margin:.5rem 0 0;color:var(--text-dim)" id="monitoringPeriod">,</p>
       </div>
       <p class="report-meta" id="reportMeta"></p>
     </div>
 
     <div class="statgrid">
-      <div class="stat"><p class="stat__k">Current 14-day mean</p><p class="stat__v" id="sCurrent">—</p><p class="stat__n">CogniScore</p></div>
-      <div class="stat"><p class="stat__k">Prior 31-day mean</p><p class="stat__v" id="sPrevious">—</p><p class="stat__n">CogniScore</p></div>
-      <div class="stat"><p class="stat__k">Change</p><p class="stat__v" id="sChange">—</p><p class="stat__n">versus prior period</p></div>
-      <div class="stat"><p class="stat__k">Trend</p><p class="stat__v" id="sTrend">—</p><p class="stat__n">30-day direction</p></div>
+      <div class="stat"><p class="stat__k">Current 14-day mean</p><p class="stat__v" id="sCurrent">,</p><p class="stat__n">CogniScore</p></div>
+      <div class="stat"><p class="stat__k">Prior 31-day mean</p><p class="stat__v" id="sPrevious">,</p><p class="stat__n">CogniScore</p></div>
+      <div class="stat"><p class="stat__k">Change</p><p class="stat__v" id="sChange">,</p><p class="stat__n">versus prior period</p></div>
+      <div class="stat"><p class="stat__k">Trend</p><p class="stat__v" id="sTrend">,</p><p class="stat__n">30-day direction</p></div>
     </div>
 
     <div class="grid grid--2" style="margin-top:1.15rem">
       <section class="card" aria-labelledby="hdStatus">
         <h2 id="hdStatus">Monitoring status</h2>
-        <p style="margin:0 0 1rem"><span class="badge badge--grey" id="statusBadge">—</span></p>
-        <p style="margin:0 0 1.2rem"><span class="badge badge--grey" id="confidenceBadge">—</span></p>
+        <p style="margin:0 0 1rem"><span class="badge badge--grey" id="statusBadge">,</span></p>
+        <p style="margin:0 0 1.2rem"><span class="badge badge--grey" id="confidenceBadge">,</span></p>
         <p id="statusNote" style="margin:0;color:var(--text-dim);font-size:.93rem"></p>
       </section>
 
       <section class="card" aria-labelledby="hdData">
         <h2 id="hdData">Data basis</h2>
         <dl class="score__side" style="margin:0"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem 1.4rem">
-          <div><dt>Sessions analysed</dt><dd id="dAnalysed">—</dd></div>
-          <div><dt>Excluded on quality</dt><dd id="dExcluded">—</dd></div>
-          <div><dt>Baseline sessions</dt><dd id="dBaseline">—</dd></div>
-          <div><dt>Baseline status</dt><dd id="dStatus">—</dd></div>
+          <div><dt>Sessions analysed</dt><dd id="dAnalysed">,</dd></div>
+          <div><dt>Excluded on quality</dt><dd id="dExcluded">,</dd></div>
+          <div><dt>Baseline sessions</dt><dd id="dBaseline">,</dd></div>
+          <div><dt>Baseline status</dt><dd id="dStatus">,</dd></div>
         </div></dl>
       </section>
     </div>
@@ -137,6 +137,7 @@
 
 <script src="../vendor/chart.umd.min.js"></script>
 <script src="../assets/starfield.js"></script>
+<script src="../assets/cursor.js"></script>
 <script src="../assets/api.js"></script>
 <script src="../assets/charts.js"></script>
 <script src="doctor.js"></script>

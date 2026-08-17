@@ -89,7 +89,7 @@ app.add_middleware(
     max_age=600,
 )
 
-MAX_BODY_BYTES = 512 * 1024      # 512 KB — a legitimate batch is a few KB
+MAX_BODY_BYTES = 512 * 1024      # 512 KB, a legitimate batch is a few KB
 
 
 @app.middleware("http")
@@ -156,7 +156,7 @@ def root():
 
     Deliberately left in the OpenAPI schema. Hiding it would keep the docs
     tidier, but Attack 10 sweeps every endpoint *from the live schema* so that
-    a newly added route is covered the moment it exists — and a route the sweep
+    a newly added route is covered the moment it exists, and a route the sweep
     cannot see is precisely the route nobody checks. It is listed as public
     instead, alongside /api/health.
     """
@@ -195,7 +195,7 @@ def register(body: RegisterRequest, request: Request):
     try:
         user = create_user(body.username, body.password, body.role, body.first_name)
     except ValueError:
-        # Same generic message whether the username is taken or invalid —
+        # Same generic message whether the username is taken or invalid,
         # otherwise registration becomes a user-enumeration oracle.
         raise HTTPException(status_code=400, detail="Could not create that account.")
 
@@ -261,7 +261,7 @@ def ingest_session(
     """Accept one 60-second feature batch.
 
     The quality gate runs before anything else. Low-quality sessions are still
-    stored — with `excluded = 1` and a reason code — so the exclusion rate is a
+    stored, with `excluded = 1` and a reason code, so the exclusion rate is a
     measurable number rather than an invisible one.
     """
     enforce(request, "session", *LIMITS["session"], user=user)
@@ -445,7 +445,7 @@ def baseline_fit(request: Request, user: dict = Depends(get_current_user)):
 
 @app.post("/api/baseline/refit", tags=["models"])
 def baseline_refit(request: Request, user: dict = Depends(get_current_user)):
-    """Deliberate user-initiated recalibration — after illness, a new keyboard,
+    """Deliberate user-initiated recalibration, after illness, a new keyboard,
     or a major life change. Unlike the initial fit, this one takes the most
     recent two weeks as the new reference."""
     enforce(request, "fit", *LIMITS["fit"], user=user)
@@ -679,7 +679,7 @@ def submit_task_score(
     """Store one round of the four cognitive mini-tasks.
 
     The composite is computed here, server-side, from the four raw measurements.
-    The client cannot send a composite — the field does not exist on the model.
+    The client cannot send a composite, the field does not exist on the model.
     """
     today = _date.today().isoformat()
     parts: list[float] = []
@@ -933,7 +933,7 @@ def doctor_report_for(
     request: Request,
     actor: dict = Depends(get_current_user),
 ):
-    """The only endpoint that names another user — and it is gated on a consent
+    """The only endpoint that names another user, and it is gated on a consent
     grant re-checked on every call, with the denial recorded either way."""
     try:
         rbac.require_self_or_consenting_doctor(target_user_id, actor)
@@ -977,7 +977,7 @@ def feature_importance(user: dict = Depends(get_current_user)):
         "backend": model.backend,
         "warning": (
             "Trained on IsolationForest pseudo-labels, not clinical ground "
-            "truth. Exploratory only — no clinical validation is claimed."
+            "truth. Exploratory only, no clinical validation is claimed."
         ),
     }
 
@@ -1020,7 +1020,7 @@ def federated_status():
 @app.get("/api/export/me", tags=["privacy"])
 def export_my_data(request: Request, user: dict = Depends(get_current_user)):
     """Everything CogniDiff holds about the caller. Portability is part of
-    control — a user who cannot see their data cannot judge our claims."""
+    control, a user who cannot see their data cannot judge our claims."""
     audit.log_action(user["id"], user["role"], "EXPORT_DATA", "export",
                      audit.OUTCOME_SUCCESS, request=request)
     return {
@@ -1063,6 +1063,6 @@ def delete_me(request: Request, user: dict = Depends(get_current_user)):
         "models_deleted": True,
         "message": (
             "All your data has been deleted and your models removed. Your "
-            "session has been invalidated — please sign in again."
+            "session has been invalidated, please sign in again."
         ),
     }

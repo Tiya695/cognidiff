@@ -1,8 +1,8 @@
-/* CogniDiff landing — scroll choreography for the seven scan states.
+/* CogniDiff landing, scroll choreography for the seven scan states.
  *
  * GSAP ScrollTrigger drives one thing per state: a set of numbers on the
  * NeuralBrain instance (camera position, rotation, morph, pulse, focus). The
- * brain itself knows nothing about scrolling — it just renders whatever those
+ * brain itself knows nothing about scrolling, it just renders whatever those
  * numbers currently say, which keeps the animation and the geometry separable.
  */
 
@@ -12,47 +12,46 @@
   document.documentElement.classList.add('js');
 
   const canvas = document.getElementById('brain');
-  const stepEls = Array.from(document.querySelectorAll('#steps li'));
   const sections = Array.from(document.querySelectorAll('.state'));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------------------------------------------------------------------
-  // state table — camera, orientation and shader uniforms per section
+  // state table, camera, orientation and shader uniforms per section
   // ---------------------------------------------------------------------
 
   const STATES = {
-    // 01 ARRIVAL — full front view, slow continuous rotation
+    // 01 ARRIVAL, full front view, slow continuous rotation
     1: { cam: [0, 0.02, 4.25], target: [0, 0.04, 0], spin: 0.055,
          morph: 0, pulse: false, focus: null, lines: 0 },
 
-    // 02 THE BASELINE — tilt up and push in on the cortical surface
+    // 02 THE BASELINE, tilt up and push in on the cortical surface
     2: { cam: [0.35, 1.15, 2.30], target: [0, 0.34, 0], spin: 0.030,
          morph: 0, pulse: false, focus: null, lines: 0 },
 
-    // 03 SIGNALS — centred, pulse waves travelling through the cloud
+    // 03 SIGNALS, centred, pulse waves travelling through the cloud
     3: { cam: [0, 0.02, 3.05], target: [0, 0.02, 0], spin: 0.018,
          morph: 0, pulse: true, focus: null, lines: 0 },
 
-    // 04 THE NETWORK — disperse into a constellation of nodes and links
+    // 04 THE NETWORK, disperse into a constellation of nodes and links
     4: { cam: [0, 0, 8.20], target: [0, 0, 0], spin: 0.012,
          morph: 1, pulse: false, focus: null, lines: 0.42 },
 
-    // 05 INSIGHT — regather, swing behind to the occipital pole
+    // 05 INSIGHT, regather, swing behind to the occipital pole
     5: { cam: [0.55, 0.18, 3.55], target: [0, 0.02, 0], spin: 0, rotY: Math.PI,
-         morph: 0, pulse: false, focus: [0, -0.02, -1.02, 0.78], lines: 0 },
+         morph: 0, pulse: false, focus: [0, -0.02, -1.02, 0.60], lines: 0 },
 
-    // 06 BALANCE — pan down onto the cerebellum
+    // 06 BALANCE, pan down onto the cerebellum
     6: { cam: [0.15, -0.72, 2.95], target: [0, -0.52, -0.35], spin: 0.022,
          rotY: Math.PI * 0.82,
-         morph: 0, pulse: false, focus: [0, -0.60, -0.74, 0.62], lines: 0 },
+         morph: 0, pulse: false, focus: [0, -0.58, -0.72, 0.44], lines: 0 },
 
-    // 07 SUMMARY — pull back out to the full view, steady rotation
+    // 07 SUMMARY, pull back out to the full view, steady rotation
     7: { cam: [0, 0.02, 4.75], target: [0, 0.02, 0], spin: 0.052,
          morph: 0, pulse: false, focus: null, lines: 0 },
   };
 
   // ---------------------------------------------------------------------
-  // live telemetry — the numbers in the metadata rows tick like instruments
+  // live telemetry, the numbers in the metadata rows tick like instruments
   // ---------------------------------------------------------------------
 
   function startTelemetry() {
@@ -83,7 +82,7 @@
   function boot() {
     startTelemetry();
 
-    // Reveal copy with IntersectionObserver — independent of the WebGL layer,
+    // Reveal copy with IntersectionObserver, independent of the WebGL layer,
     // so the page still animates its text if the GPU path bails out.
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -97,7 +96,7 @@
       brain = new window.NeuralBrain(canvas, { seed: 20260817 });
     } catch (err) {
       // No WebGL, or three.js failed to load. The page is fully readable
-      // without it — hide the dead canvas and carry on.
+      // without it, hide the dead canvas and carry on.
       console.warn('[CogniDiff] neural scan unavailable:', err.message);
       canvas.style.display = 'none';
     }
@@ -113,7 +112,7 @@
       brain.autoSpin = s.spin;
       brain.start();
 
-      // Pause the render loop when the tab is hidden — no point burning a GPU
+      // Pause the render loop when the tab is hidden, no point burning a GPU
       // on a page nobody is looking at.
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) brain.stop(); else brain.start();
@@ -135,13 +134,6 @@
 
     let pulseTween = null;
 
-    function markStep(n) {
-      stepEls.forEach((el, i) => {
-        if (i === n - 1) el.setAttribute('aria-current', 'step');
-        else el.removeAttribute('aria-current');
-      });
-    }
-
     /** Rotate to a specific facing, taking the shortest way round. */
     function targetRotation(current, wanted) {
       const turns = Math.round((current - wanted) / (Math.PI * 2));
@@ -149,7 +141,6 @@
     }
 
     function applyState(n) {
-      markStep(n);
       if (!brain) return;
 
       const s = STATES[n];
@@ -212,7 +203,7 @@
           brain.uniforms.uPulse.value = -1;
         }
       } else {
-        // No GSAP or reduced motion — jump straight to the state.
+        // No GSAP or reduced motion, jump straight to the state.
         brain.camX = s.cam[0]; brain.camY = s.cam[1]; brain.camZ = s.cam[2];
         brain.cameraTarget.set(...s.target);
         brain.uniforms.uMorph.value = s.morph;

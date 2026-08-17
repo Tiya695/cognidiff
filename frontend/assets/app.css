@@ -349,7 +349,7 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
 @media print {
   :root { --text: #111; --text-dim: #333; --muted: #555; --faint: #666; --line: #ccc; }
   body { background: #fff !important; color: #111; }
-  .field-bg, .field, #starfield, #brain, .appbar, .no-print, .btn { display: none !important; }
+  .cosmos, #starfield, #brain, .appbar, .no-print, .btn { display: none !important; }
   .card, .panel, .banner { border: 1px solid #ccc !important; background: #fff !important; backdrop-filter: none !important; break-inside: avoid; }
   .disclaimer { border: 2px solid #333 !important; background: #f4f4f4 !important; break-inside: avoid; }
   table.data td, table.data th { border-bottom: 1px solid #ddd; }

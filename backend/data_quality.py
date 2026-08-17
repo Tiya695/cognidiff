@@ -5,7 +5,7 @@ The principle, stated once and enforced everywhere:
     A 10-second typing session, a browser lag spike, or a half-captured batch
     must never be able to move someone's cognitive score.
 
-A session that fails this gate is EXCLUDED from cognitive scoring — never
+A session that fails this gate is EXCLUDED from cognitive scoring, never
 silently averaged in. Every exclusion is logged with a reason code so the
 exclusion rate is a real measured number we can report in the paper.
 """
@@ -18,7 +18,7 @@ from typing import Optional
 from .config import QUALITY_EXCLUDE_THRESHOLD
 
 # ---------------------------------------------------------------------------
-# reject criteria — an explicit list, so the gate is a real component
+# reject criteria, an explicit list, so the gate is a real component
 # ---------------------------------------------------------------------------
 
 MIN_KEYSTROKES = 20          # below this there is no rhythm to measure
@@ -30,7 +30,7 @@ MIN_PLAUSIBLE_IKI_MS = 1     # 0 ms between keys is a clock artefact, not typing
 MAX_PLAUSIBLE_WPM = 300
 
 REASON_CODES = {
-    "LOW_VOLUME": "Fewer than 20 keystrokes — not enough rhythm to measure.",
+    "LOW_VOLUME": "Fewer than 20 keystrokes, not enough rhythm to measure.",
     "SHORT_DURATION": "Session covered under 20 seconds of the 60-second window.",
     "MISSING_FEATURES": "One or more required features were absent or null.",
     "ABNORMAL_TIMING": "Impossible inter-key intervals or a clock jump.",
@@ -90,7 +90,7 @@ class DataQualityEngine:
     def _duration_score(batch: dict) -> tuple[float, Optional[str]]:
         dur = float(batch.get("duration_ms") or 0)
         if dur <= 0:
-            return 50.0, None            # unknown duration — neutral, not fatal
+            return 50.0, None            # unknown duration, neutral, not fatal
         if dur < MIN_DURATION_MS:
             return round(100 * dur / FULL_DURATION_MS, 1), "SHORT_DURATION"
         return round(min(100.0, 100 * dur / FULL_DURATION_MS), 1), None
@@ -145,7 +145,7 @@ class DataQualityEngine:
         different rhythm and would pollute a baseline built on writing."""
         cats = batch.get("key_categories") or ""
         if not cats:
-            return 70.0, None            # unknown — mildly penalised, not fatal
+            return 70.0, None            # unknown, mildly penalised, not fatal
 
         total = len(cats)
         letters = cats.count("l") / total
@@ -188,7 +188,7 @@ class DataQualityEngine:
 
         # Device consistency. A new keyboard changes typing rhythm far more than
         # a mild cognitive change does, so a session from an unfamiliar device
-        # can never carry full weight — it is capped, and flagged for the drift
+        # can never carry full weight, it is capped, and flagged for the drift
         # detector to turn into a recalibration window.
         device_changed = False
         fingerprint = batch.get("device_fingerprint")

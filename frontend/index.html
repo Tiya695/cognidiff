@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CogniDiff — Neural Mapping</title>
-<meta name="description" content="CogniDiff detects deviation from your own typing baseline — privately, on your terms. A monitoring and screening tool, not a diagnostic device.">
+<title>CogniDiff · Neural Mapping</title>
+<meta name="description" content="CogniDiff detects deviation from your own typing baseline, privately and on your terms. A monitoring and screening tool, not a diagnostic device.">
 <link rel="icon" href="assets/favicon.png">
 <link rel="stylesheet" href="assets/neural.css">
 <link rel="stylesheet" href="assets/landing.css">
@@ -13,7 +13,7 @@
 
 <a class="skip-link" href="#state-1">Skip to content</a>
 
-<div class="field" aria-hidden="true"></div>
+<div class="cosmos" aria-hidden="true"></div>
 <canvas id="starfield" aria-hidden="true"></canvas>
 <canvas id="brain" aria-hidden="true"></canvas>
 
@@ -21,7 +21,7 @@
 <p class="sr-only">
   A three-dimensional particle rendering of a human brain rotates and zooms as
   you scroll through seven sections describing how CogniDiff works. The
-  animation is decorative — all information is in the text below.
+  animation is decorative, all information is in the text below.
 </p>
 
 <!-- fixed HUD ---------------------------------------------------------- -->
@@ -35,11 +35,6 @@
   <a class="btn btn--ghost topbar__cta" href="pages/login.html">Open dashboard</a>
 </nav>
 
-<ol class="steps" id="steps" aria-label="Section progress">
-  <li aria-current="step">01</li><li>02</li><li>03</li>
-  <li>04</li><li>05</li><li>06</li><li>07</li>
-</ol>
-
 <main id="scroll">
 
   <!-- 01 ARRIVAL ------------------------------------------------------- -->
@@ -49,7 +44,7 @@
       <h1 class="display">Eighty-six billion neurons, and one quiet keyboard.</h1>
       <p class="lede">
         Everything you think passes through a body that has to type it. CogniDiff
-        watches only the rhythm of that translation — never the words — and
+        watches only the rhythm of that translation, never the words, and
         learns what normal looks like for you.
       </p>
       <ul class="telemetry">
@@ -67,7 +62,7 @@
       <h2 class="display">Your baseline is you, not an average.</h2>
       <p class="lede">
         A fast typist and a slow typist are both perfectly normal. CogniDiff never
-        compares you to a population — it builds a statistical picture of your own
+        compares you to a population, it builds a statistical picture of your own
         typing across two weeks, hour by hour, and measures everything after that
         against it.
       </p>
@@ -79,7 +74,7 @@
     </div>
   </section>
 
-  <!-- 03 SIGNALS — terminal card --------------------------------------- -->
+  <!-- 03 SIGNALS, terminal card --------------------------------------- -->
   <section class="state state--center" id="state-3" data-state="3">
     <div class="state__copy state__copy--wide">
       <p class="tag">SIGNALS</p>
@@ -93,7 +88,7 @@
         <div class="terminal__body">
           <p class="terminal__line">
             Step inside the traffic. Each keystroke carries a timestamp, a hold
-            duration and a gap — chemical to electric and back, a hundred metres
+            duration and a gap, chemical to electric and back, a hundred metres
             a second, never still.
           </p>
           <dl class="terminal__rows">
@@ -133,8 +128,8 @@
       <h2 class="display">A number is useless until it tells you why.</h2>
       <p class="lede">
         A score of 62 on its own invites either panic or dismissal. So every
-        CogniScore arrives with the three things that moved it — your pauses are
-        21% longer, your corrections are up 14% — in words you can check against
+        CogniScore arrives with the three things that moved it, your pauses are
+        21% longer, your corrections are up 14%, in words you can check against
         your own week.
       </p>
       <ul class="telemetry">
@@ -152,7 +147,7 @@
       <h2 class="display">The quiet half that keeps you upright.</h2>
       <p class="lede">
         One bad night is not a signal. CogniDiff refuses to alarm on a single
-        session — it escalates only on patterns that persist across days, and a
+        session, it escalates only on patterns that persist across days, and a
         low-confidence reading raises nothing at all.
       </p>
       <ul class="telemetry">
@@ -201,6 +196,7 @@
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="assets/starfield.js"></script>
+<script src="assets/cursor.js"></script>
 <script src="assets/neural-brain.js"></script>
 <script src="assets/landing.js"></script>
 </body>

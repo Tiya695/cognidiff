@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard — CogniDiff</title>
+<title>Dashboard · CogniDiff</title>
 <link rel="icon" href="../assets/favicon.png">
 <link rel="stylesheet" href="../assets/neural.css">
 <link rel="stylesheet" href="../assets/app.css">
@@ -11,7 +11,7 @@
 <body>
 
 <a class="skip-link" href="#main">Skip to dashboard content</a>
-<div class="field" aria-hidden="true"></div>
+<div class="cosmos" aria-hidden="true"></div>
 <canvas id="starfield" aria-hidden="true"></canvas>
 
 <header class="appbar">
@@ -68,10 +68,10 @@
                   stroke-dasharray="0 327" ></circle>
         </svg>
         <div class="ring__inner">
-          <p class="ring__num" id="scoreNum">—</p>
+          <p class="ring__num" id="scoreNum">,</p>
           <p class="ring__of">OUT OF 100</p>
           <p class="ring__conf"><span class="badge badge--grey" id="confBadge">
-            <span class="badge__dot" aria-hidden="true"></span><span id="confText">CONFIDENCE —</span>
+            <span class="badge__dot" aria-hidden="true"></span><span id="confText">CONFIDENCE ,</span>
           </span></p>
         </div>
       </div>
@@ -82,12 +82,12 @@
           compared against anybody else.
         </p>
         <dl>
-          <div><dt>Raw score</dt><dd id="mRaw">—</dd></div>
-          <div><dt>Context adjusted</dt><dd id="mAdj">—</dd></div>
-          <div><dt>Task blend</dt><dd id="mBlend">—</dd></div>
-          <div><dt>Deviation</dt><dd id="mDev">—</dd></div>
-          <div><dt>Tomorrow (LSTM)</dt><dd id="mPredict">—</dd></div>
-          <div><dt>Model agreement</dt><dd id="mAgree">—</dd></div>
+          <div><dt>Raw score</dt><dd id="mRaw">,</dd></div>
+          <div><dt>Context adjusted</dt><dd id="mAdj">,</dd></div>
+          <div><dt>Task blend</dt><dd id="mBlend">,</dd></div>
+          <div><dt>Deviation</dt><dd id="mDev">,</dd></div>
+          <div><dt>Tomorrow (LSTM)</dt><dd id="mPredict">,</dd></div>
+          <div><dt>Model agreement</dt><dd id="mAgree">,</dd></div>
         </dl>
       </div>
     </div>
@@ -132,10 +132,10 @@
   <section class="card" style="margin-top:1.15rem" aria-labelledby="hdQuality">
     <h2 id="hdQuality">Data quality</h2>
     <div class="statgrid">
-      <div class="stat"><p class="stat__k">Sessions analysed</p><p class="stat__v" id="qAnalysed">—</p></div>
-      <div class="stat"><p class="stat__k">Excluded on quality</p><p class="stat__v" id="qExcluded">—</p></div>
-      <div class="stat"><p class="stat__k">Exclusion rate</p><p class="stat__v" id="qRate">—</p></div>
-      <div class="stat"><p class="stat__k">Baseline sessions</p><p class="stat__v" id="qBaseline">—</p></div>
+      <div class="stat"><p class="stat__k">Sessions analysed</p><p class="stat__v" id="qAnalysed">,</p></div>
+      <div class="stat"><p class="stat__k">Excluded on quality</p><p class="stat__v" id="qExcluded">,</p></div>
+      <div class="stat"><p class="stat__k">Exclusion rate</p><p class="stat__v" id="qRate">,</p></div>
+      <div class="stat"><p class="stat__k">Baseline sessions</p><p class="stat__v" id="qBaseline">,</p></div>
     </div>
     <div class="scroll-x" style="margin-top:1.2rem">
       <table class="data">
@@ -148,7 +148,7 @@
 
   <!-- context ----------------------------------------------------------- -->
   <section class="card" style="margin-top:1.15rem" aria-labelledby="hdContext">
-    <h2 id="hdContext">Today's context <span style="text-transform:none;letter-spacing:0;color:var(--muted)">— optional</span></h2>
+    <h2 id="hdContext">Today's context <span style="text-transform:none;letter-spacing:0;color:var(--muted)">, optional</span></h2>
     <p style="margin:0 0 1.2rem;color:var(--text-dim);font-size:.93rem">
       Sleep, stress and illness all move typing without anything cognitive changing.
       Telling us softens today's reading instead of letting it look like a decline.
@@ -177,7 +177,7 @@
       <h2 id="hdAccess">Manage access</h2>
       <p style="margin:0 0 1.1rem;color:var(--text-dim);font-size:.93rem">
         A clinician can only open your report while you have granted them access.
-        Revoking takes effect on their very next request — there is no grace period.
+        Revoking takes effect on their very next request, there is no grace period.
       </p>
       <form id="grantForm" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem">
         <label class="sr-only" for="doctorUser">Doctor username</label>
@@ -196,7 +196,7 @@
     <section class="card" aria-labelledby="hdAudit">
       <h2 id="hdAudit">Access log</h2>
       <p style="margin:0 0 1.1rem;color:var(--text-dim);font-size:.93rem">
-        Every action taken on your data, by anyone — including you.
+        Every action taken on your data, by anyone, including you.
       </p>
       <div class="scroll-x" style="max-height:320px;overflow-y:auto">
         <table class="data">
@@ -232,6 +232,7 @@
 
 <script src="../vendor/chart.umd.min.js"></script>
 <script src="../assets/starfield.js"></script>
+<script src="../assets/cursor.js"></script>
 <script src="../assets/api.js"></script>
 <script src="../assets/charts.js"></script>
 <script src="dashboard.js"></script>

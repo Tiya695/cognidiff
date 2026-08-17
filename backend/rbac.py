@@ -2,10 +2,10 @@
 
 Three roles, and one deliberate design decision inside them:
 
-  USER    — can access their own data, and only their own.
-  DOCTOR  — can access the data of users who have *explicitly* granted them
+  USER, can access their own data, and only their own.
+  DOCTOR, can access the data of users who have *explicitly* granted them
             access, and only while that grant is active.
-  ADMIN   — system management. **No access to health data by default.**
+  ADMIN, system management. **No access to health data by default.**
 
 That last line is the one worth defending. Most systems make the admin role a
 superset of everything, which means the operator of a health tool can read every
@@ -15,7 +15,7 @@ refuse them exactly as they refuse a stranger. Internal misuse is a real threat
 model, not a hypothetical one.
 
 Consent is checked per request, never cached. Revocation therefore takes effect
-on the very next call — a grace period would be a real vulnerability
+on the very next call, a grace period would be a real vulnerability
 (Phase 6, Attack 11).
 """
 
@@ -65,9 +65,9 @@ def require_self_or_consenting_doctor(target_user_id: str, actor: dict) -> dict:
     Returns the target user record, or raises 403. The three branches are the
     whole access-control policy for health data:
 
-      * the user themselves — always allowed;
-      * a doctor holding an active consent grant — allowed while it lasts;
-      * anyone else, including ADMIN — refused.
+      * the user themselves, always allowed;
+      * a doctor holding an active consent grant, allowed while it lasts;
+      * anyone else, including ADMIN, refused.
     """
     if actor["id"] == target_user_id:
         return actor

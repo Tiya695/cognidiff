@@ -1,4 +1,4 @@
-/* CogniDiff popup — consent toggle, allowlist manager, data controls.
+/* CogniDiff popup, consent toggle, allowlist manager, data controls.
  *
  * Every value that comes back from storage or the network is written with
  * textContent, never innerHTML. A hostile string in the allowlist renders as
@@ -21,7 +21,7 @@ function say(text, isError = false) {
 }
 
 // ---------------------------------------------------------------------------
-// starfield — the same drifting field used across the CogniDiff web app
+// starfield, the same drifting field used across the CogniDiff web app
 // ---------------------------------------------------------------------------
 
 function starfield() {
@@ -76,7 +76,7 @@ $('toggle').addEventListener('change', async (e) => {
   await chrome.storage.local.set({ monitoring_active: active });
   paintToggle(active);
   say(active
-    ? 'Monitoring on. Rhythm features only — never your text.'
+    ? 'Monitoring on. Rhythm features only, never your text.'
     : 'Monitoring off. Nothing is being captured.');
 });
 
@@ -91,7 +91,7 @@ function renderAllowlist(list) {
   if (list.length === 0) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = 'No sites added — monitoring is inactive.';
+    li.textContent = 'No sites added, monitoring is inactive.';
     ul.appendChild(li);
     return;
   }
@@ -150,8 +150,8 @@ async function refreshStats() {
   const s = await send({ type: 'get_summary' });
   if (!s) return;
   $('sToday').textContent = s.today_sessions ?? 0;
-  $('sWpm').textContent   = s.avg_wpm ? s.avg_wpm : '—';
-  $('sIki').textContent   = s.avg_iki_ms ? `${Math.round(s.avg_iki_ms)}ms` : '—';
+  $('sWpm').textContent   = s.avg_wpm ? s.avg_wpm : ',';
+  $('sIki').textContent   = s.avg_iki_ms ? `${Math.round(s.avg_iki_ms)}ms` : ',';
   $('sQueue').textContent = s.pending ?? 0;
 }
 
@@ -188,7 +188,7 @@ $('viewData').addEventListener('click', async () => {
   dump.hidden = false;
   dump.textContent =
     `${data.count} session(s) stored locally, ${data.pending} awaiting upload.\n` +
-    `Most recent 5 (note: numbers only — no typed text exists anywhere):\n\n` +
+    `Most recent 5 (note: numbers only, no typed text exists anywhere):\n\n` +
     JSON.stringify(recent, null, 2);
   say('Showing your locally stored features.');
 });

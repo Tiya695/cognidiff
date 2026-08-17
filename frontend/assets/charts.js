@@ -2,7 +2,7 @@
  *
  * One place for the palette and axis styling so every chart in the product
  * reads the same. Each chart is paired with a text summary written into a
- * screen-reader-only element — a <canvas> is completely opaque to assistive
+ * screen-reader-only element, a <canvas> is completely opaque to assistive
  * technology, so the trend has to exist in words as well.
  */
 

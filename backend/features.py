@@ -1,4 +1,4 @@
-"""Feature engineering — the cognitive signal is built here.
+"""Feature engineering, the cognitive signal is built here.
 
 Every feature is defined once, in one place, with its formula, units and valid
 range recorded in docs/feature_definitions.md. If a definition changes,
@@ -6,7 +6,7 @@ FEATURE_SCHEMA_VERSION in config.py must be bumped: scores computed under
 different schema versions are not comparable.
 
 Nothing in this module ever sees typed text. Its inputs are timing arrays and a
-sequence of category codes (l/d/s/b/p) — five symbols, no characters.
+sequence of category codes (l/d/s/b/p), five symbols, no characters.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ def detect_correction_events(
 
     Counting *consecutive backspace pairs* is a bad proxy and CogniDiff does not
     use it. Typing "hello wrld", then three separate backspaces spread over a
-    second, then retyping "o", is **one** correction — but it may contain no
+    second, then retyping "o", is **one** correction, but it may contain no
     consecutive backspace pair at all.
 
     A correction event here is one continuous delete-and-retype episode:
@@ -115,7 +115,7 @@ def rhythm_variability(intervals: Sequence[float]) -> float:
     """Population standard deviation of inter-key intervals, in ms.
 
     Low variability means an even, automatic rhythm. High variability means the
-    typing is starting and stopping — hesitation, word-finding, or divided
+    typing is starting and stopping, hesitation, word-finding, or divided
     attention. It is the feature most sensitive to *how* typing is produced
     rather than how fast.
     """
@@ -177,7 +177,7 @@ def enrich_batch(raw_batch: dict) -> dict:
         intervals = _offsets_to_intervals(offsets)
     intervals = [float(i) for i in (intervals or [])]
 
-    # error_rate — proportion of keystrokes that were deletions. 0.0–1.0.
+    # error_rate, proportion of keystrokes that were deletions. 0.0–1.0.
     error_rate = round(backspaces / total, 4) if total else 0.0
 
     corrections = detect_correction_events(categories, offsets)

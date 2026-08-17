@@ -7,7 +7,7 @@ a daily average.
 `slowapi` is listed in requirements.txt and is used for its middleware if it is
 installed, but the limiter below is the one that actually enforces the limits.
 It is dependency-free and deterministic, which matters because the attacker
-simulations are encoded as automated tests — a limiter that behaves differently
+simulations are encoded as automated tests, a limiter that behaves differently
 under pytest is not a limiter you can regression-test.
 
 Storage is in-process. That is correct for CogniDiff's single-instance
@@ -88,7 +88,7 @@ def enforce(
 
 # Limits, in one place so the docs and the tests can quote the same numbers.
 LIMITS = {
-    "session":  (5, 60.0),        # 5 batches per minute — one per 60s window
+    "session":  (5, 60.0),        # 5 batches per minute, one per 60s window
     "login":    (10, 300.0),      # 10 attempts per 5 minutes per IP
     "summary":  (10, 3600.0),     # Claude API is the expensive one
     "score":    (30, 60.0),

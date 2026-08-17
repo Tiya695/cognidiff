@@ -1,4 +1,4 @@
-"""Escalation logic — deliberately slow to alarm.
+"""Escalation logic, deliberately slow to alarm.
 
 Cognitive performance varies naturally with stress, sleep, illness and a hundred
 other things. A tool that alerts on one bad session is not sensitive; it is
@@ -6,7 +6,7 @@ broken, and it costs its user real anxiety for nothing. CogniDiff therefore
 escalates only on *persistence*: patterns that survive across multiple days.
 
 No message in this module uses diagnostic language. Nothing here names a disease
-or asserts a cause — the strongest thing CogniDiff will ever say is that a
+or asserts a cause, the strongest thing CogniDiff will ever say is that a
 pattern has continued long enough to be worth a professional's opinion.
 """
 
@@ -22,7 +22,7 @@ STATUS_PERSISTENT = "PERSISTENT_DEVIATION"
 STATUS_RECALIBRATING = "RECALIBRATING"
 STATUS_INSUFFICIENT = "INSUFFICIENT_DATA"
 
-#: Colour is never the only signal — every state carries a text label and an
+#: Colour is never the only signal, every state carries a text label and an
 #: icon name too, because a red circle means nothing to a colourblind user and
 #: nothing at all to a screen reader.
 _PRESENTATION = {
@@ -84,7 +84,7 @@ class AlertEngine:
             # A new keyboard must never be read as cognitive decline.
             return self._build(
                 STATUS_RECALIBRATING,
-                "Recalibrating to your new setup — scores are provisional and no "
+                "Recalibrating to your new setup, scores are provisional and no "
                 "alerts will be raised until your new baseline is established.",
                 anomalies_7d=anomalies_7d, provisional=True,
             )
@@ -113,7 +113,7 @@ class AlertEngine:
                 STATUS_PERSISTENT,
                 "Your typing patterns have shifted steadily over the past month "
                 "and the change has persisted. This is worth discussing with a "
-                "healthcare professional — bring your report with you.",
+                "healthcare professional, bring your report with you.",
                 recommend_evaluation=True, anomalies_7d=anomalies_7d,
                 trend_30d=trend_30d,
             )
@@ -134,7 +134,7 @@ class AlertEngine:
             return self._build(
                 STATUS_MONITOR,
                 "A few sessions this week looked different from your baseline. "
-                "This is within the range of normal variation — we are keeping "
+                "This is within the range of normal variation, we are keeping "
                 "an eye on it.",
                 anomalies_7d=anomalies_7d, trend_30d=trend_30d,
             )

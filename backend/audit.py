@@ -1,12 +1,11 @@
 """Audit logging.
 
-CogniDiff does not only protect health data — it records every access to it.
+CogniDiff does not only protect health data, it records every access to it.
 A user can open their dashboard and see exactly who looked at their cognitive
 information and when, including their own logins and every doctor view.
 
 What is never logged: keystroke data, feature values, scores, or any health
-content. The log answers *who did what to which resource and did it succeed* —
-nothing about what the data said. An audit trail that leaks the thing it is
+content. The log answers *who did what to which resource and did it succeed*, nothing about what the data said. An audit trail that leaks the thing it is
 guarding is worse than none.
 """
 
@@ -59,7 +58,7 @@ def log_action(
     user_id: Optional[str] = None,
     request: Optional[Request] = None,
 ) -> int:
-    """Insert one audit row. Never raises — a logging failure must not take
+    """Insert one audit row. Never raises, a logging failure must not take
     down the request it was recording."""
     try:
         return db.insert("security_audit_log", {

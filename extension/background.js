@@ -1,14 +1,14 @@
-/* CogniDiff — background service worker.
+/* CogniDiff, background service worker.
  *
  * Receives 60-second feature batches from content scripts, stamps them with a
  * date and hour, keeps a local copy in chrome.storage.local, and forwards them
  * to the backend when it is reachable. If the backend is down the batch stays
- * local and is retried later — typing data is never dropped just because a
+ * local and is retried later, typing data is never dropped just because a
  * server is offline, and it is never sent anywhere else.
  */
 
 const API_BASE = 'http://localhost:8000';
-const MAX_LOCAL_SESSIONS = 5000;      // ring buffer — keeps storage bounded
+const MAX_LOCAL_SESSIONS = 5000;      // ring buffer, keeps storage bounded
 const MAX_QUEUE = 500;
 
 // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ async function storeLocally(batch) {
 
 /**
  * POST a batch to the backend. The auth token is issued by the dashboard login
- * and stored here by the popup — the extension never holds a password.
+ * and stored here by the popup, the extension never holds a password.
  */
 async function sendToBackend(batch) {
   const token = await get('auth_token', null);
@@ -96,7 +96,7 @@ async function drainQueue() {
     if (result.ok) sent += 1;
     else if (result.reason === 'offline' || result.reason.startsWith('http_5')) remaining.push(batch);
     // 4xx other than 401 means the server rejected the batch on its merits
-    // (quality gate, validation). Retrying will not help — drop it.
+    // (quality gate, validation). Retrying will not help, drop it.
   }
   await set({ pending_queue: remaining });
   return { sent, remaining: remaining.length };
@@ -109,7 +109,7 @@ async function handleBatch(batch) {
   const result = await sendToBackend(stamped);
   if (!result.ok) {
     await enqueue(stamped);
-    console.warn('[CogniDiff] batch queued locally —', result.reason);
+    console.warn('[CogniDiff] batch queued locally ,', result.reason);
     return { stored: true, synced: false, reason: result.reason };
   }
   return { stored: true, synced: true, server: result.body };
@@ -175,7 +175,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   const existing = await get('monitoring_active', null);
   if (existing === null) {
     // Opt-in by default OFF. The user turns monitoring on from the popup after
-    // reading the privacy notice — consent before capture, always.
+    // reading the privacy notice, consent before capture, always.
     await set({
       monitoring_active: false,
       site_allowlist: ['docs.google.com', 'mail.google.com', 'keep.google.com'],

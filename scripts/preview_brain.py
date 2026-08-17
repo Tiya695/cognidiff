@@ -68,7 +68,7 @@ def make_noise(rng, size=64):
 
 def cerebrum_surface(x, y, z, noise):
     """Returns (radius, fold, groove) — mirrors cerebrumSurface() in the JS."""
-    RX, RY, RZ = 0.94, 0.86, 1.16
+    RX, RY, RZ = 0.87, 0.96, 1.14
     r = 1.0 / np.sqrt((x / RX) ** 2 + (y / RY) ** 2 + (z / RZ) ** 2)
 
     r = np.where(z > 0, r * (1 - 0.12 * z ** 2), r)
@@ -111,9 +111,9 @@ def build_brain(count=COUNT, seed=SEED):
     rng = np.random.default_rng(seed)
     noise = make_noise(np.random.default_rng(seed ^ 0x9E3779B9))
 
-    n_surf = int(count * 0.74)
-    n_int = int(count * 0.09)
-    n_cb = int(count * 0.12)
+    n_surf = int(count * 0.70)
+    n_int = int(count * 0.08)
+    n_cb = int(count * 0.13)
     n_stem = count - n_surf - n_int - n_cb
 
     parts = []
@@ -156,11 +156,11 @@ def build_brain(count=COUNT, seed=SEED):
 
     # brainstem
     t = rng.random(n_stem)
-    rad = (0.20 - 0.075 * t) * (0.65 + rng.random(n_stem) * 0.35)
+    rad = (0.185 - 0.055 * t) * (0.80 + rng.random(n_stem) * 0.20)
     ang = rng.random(n_stem) * 2 * math.pi
     parts.append((np.stack([np.cos(ang) * rad,
-                            -0.42 - t * 0.78,
-                            -0.22 + np.sin(ang) * rad * 0.85], 1),
+                            -0.46 - t * 0.62,
+                            -0.20 + np.sin(ang) * rad * 0.85], 1),
                   0.45 + rng.random(n_stem) * 0.55,
                   0.30 + rng.random(n_stem) * 0.46))
 

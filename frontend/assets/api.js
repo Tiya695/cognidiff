@@ -3,7 +3,7 @@
  * Two rules this file exists to enforce:
  *
  *  1. The base URL lives here and nowhere else. No page hardcodes
- *     http://localhost:8000 — that was a Phase 6 finding.
+ *     http://localhost:8000, that was a Phase 6 finding.
  *  2. The identity is the token. Nothing in the frontend ever sends a user_id;
  *     the server resolves who you are from the Bearer token, which is what
  *     closed the IDOR hole.

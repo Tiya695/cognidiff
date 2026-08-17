@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Task assessment — CogniDiff</title>
+<title>Task assessment · CogniDiff</title>
 <link rel="icon" href="../assets/favicon.png">
 <link rel="stylesheet" href="../assets/neural.css">
 <link rel="stylesheet" href="../assets/app.css">
@@ -11,7 +11,7 @@
 <body>
 
 <a class="skip-link" href="#main">Skip to the assessment</a>
-<div class="field" aria-hidden="true"></div>
+<div class="cosmos" aria-hidden="true"></div>
 <canvas id="starfield" aria-hidden="true"></canvas>
 
 <header class="appbar">
@@ -35,7 +35,7 @@
     <h1>Four short tasks, under four minutes.</h1>
     <p>
       Passive keystroke monitoring catches gradual change. These four tasks catch
-      acute change — the kind that shows up in a single afternoon. Together they
+      acute change, the kind that shows up in a single afternoon. Together they
       give a fuller picture than either does alone. Your results blend into
       today's CogniScore at a 80/20 weighting.
     </p>
@@ -52,7 +52,7 @@
         <p style="max-width:44ch;margin:0 auto 1.6rem;color:var(--text-dim)">
           You will be shown four tasks: word recall, reaction time, pattern memory
           and a letter scramble. Each takes under a minute. Do them somewhere quiet
-          if you can — and do them at roughly the same time of day each time, so
+          if you can, and do them at roughly the same time of day each time, so
           they stay comparable.
         </p>
         <button class="btn btn--solid" id="startBtn" type="button">Begin assessment</button>
@@ -64,10 +64,10 @@
   <section class="card" id="resultsCard" style="margin-top:1.15rem" hidden aria-labelledby="hdResults">
     <h2 id="hdResults">Your results</h2>
     <div class="statgrid">
-      <div class="stat"><p class="stat__k">Word recall</p><p class="stat__v" id="rRecall">—</p><p class="stat__n">out of 5</p></div>
-      <div class="stat"><p class="stat__k">Reaction time</p><p class="stat__v" id="rReaction">—</p><p class="stat__n">mean, milliseconds</p></div>
-      <div class="stat"><p class="stat__k">Pattern memory</p><p class="stat__v" id="rPattern">—</p><p class="stat__n">sequences correct</p></div>
-      <div class="stat"><p class="stat__k">Letter scramble</p><p class="stat__v" id="rScramble">—</p><p class="stat__n">time to answer</p></div>
+      <div class="stat"><p class="stat__k">Word recall</p><p class="stat__v" id="rRecall">,</p><p class="stat__n">out of 5</p></div>
+      <div class="stat"><p class="stat__k">Reaction time</p><p class="stat__v" id="rReaction">,</p><p class="stat__n">mean, milliseconds</p></div>
+      <div class="stat"><p class="stat__k">Pattern memory</p><p class="stat__v" id="rPattern">,</p><p class="stat__n">sequences correct</p></div>
+      <div class="stat"><p class="stat__k">Letter scramble</p><p class="stat__v" id="rScramble">,</p><p class="stat__n">time to answer</p></div>
     </div>
     <p style="margin:1.4rem 0 0" id="compositeLine"></p>
     <p class="toast" id="submitToast" role="status" aria-live="polite"></p>
@@ -87,6 +87,7 @@
 </main>
 
 <script src="../assets/starfield.js"></script>
+<script src="../assets/cursor.js"></script>
 <script src="../assets/api.js"></script>
 <script src="tasks.js"></script>
 </body>

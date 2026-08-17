@@ -1,4 +1,4 @@
-/* CogniDiff — the drifting star field behind everything.
+/* CogniDiff, the drifting star field behind everything.
  *
  * Three parallax layers so the background has depth without pulling attention:
  * distant stars barely move, near ones drift and twinkle. Plus a handful of
@@ -19,12 +19,12 @@
     const dpr = Math.min(global.devicePixelRatio || 1, 2);
     const density = options.density ?? 1;
 
-    let w = 0, h = 0, layers = [], motes = [], raf = null;
+    let w = 0, h = 0, layers = [], motes = [], galaxies = [], raf = null;
 
     const LAYERS = [
-      { n: 130, speed: 0.0022, size: [0.35, 0.9],  alpha: [0.14, 0.42] },
-      { n: 70,  speed: 0.0060, size: [0.55, 1.25], alpha: [0.26, 0.66] },
-      { n: 26,  speed: 0.0125, size: [0.85, 1.75], alpha: [0.42, 0.95] },
+      { n: 260, speed: 0.0030, size: [0.35, 0.95], alpha: [0.20, 0.52] },
+      { n: 140, speed: 0.0075, size: [0.55, 1.35], alpha: [0.34, 0.78] },
+      { n: 52,  speed: 0.0150, size: [0.90, 1.95], alpha: [0.50, 1.00] },
     ];
 
     function seed() {
@@ -40,6 +40,24 @@
         })),
       }));
 
+      // Distant galaxies: small tilted spirals drifting slowly across the
+      // field. They are what stops the background reading as a flat sheet of
+      // dots, and they are deliberately dim enough to sit behind the scan
+      // rather than compete with it.
+      galaxies = Array.from({ length: Math.round(7 * density) }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        r: 26 + Math.random() * 54,
+        tilt: Math.random() * Math.PI,
+        squash: 0.22 + Math.random() * 0.35,
+        a: 0.05 + Math.random() * 0.07,
+        spin: (Math.random() - 0.5) * 0.00006,
+        hue: Math.random() < 0.5 ? [150, 200, 255] : [190, 175, 255],
+        vx: (Math.random() - 0.5) * 0.000075,
+        vy: -0.00002 - Math.random() * 0.00005,
+        arms: 2 + Math.floor(Math.random() * 2),
+      }));
+
       motes = Array.from({ length: Math.round(9 * density) }, () => ({
         x: Math.random(),
         y: Math.random(),
@@ -48,6 +66,44 @@
         vx: (Math.random() - 0.5) * 0.00016,
         vy: -0.00006 - Math.random() * 0.00012,
       }));
+    }
+
+    /** One faint spiral: a glowing core plus a couple of sparse arms. */
+    function drawGalaxy(g, t) {
+      const cx = g.x * w, cy = g.y * h;
+      const rot = g.tilt + (reduce ? 0 : t * g.spin);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.scale(1, g.squash);
+
+      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, g.r);
+      const [r0, g0, b0] = g.hue;
+      core.addColorStop(0, `rgba(${r0}, ${g0}, ${b0}, ${g.a * 1.5})`);
+      core.addColorStop(0.35, `rgba(${r0}, ${g0}, ${b0}, ${g.a * 0.55})`);
+      core.addColorStop(1, `rgba(${r0}, ${g0}, ${b0}, 0)`);
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(0, 0, g.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // logarithmic arms, stippled rather than stroked so they read as stars
+      for (let arm = 0; arm < g.arms; arm++) {
+        const offset = (arm / g.arms) * Math.PI * 2;
+        for (let i = 0; i < 26; i++) {
+          const f = i / 26;
+          const ang = offset + f * 3.0;
+          const rad = g.r * 0.18 + f * g.r * 0.92;
+          const px = Math.cos(ang) * rad;
+          const py = Math.sin(ang) * rad;
+          ctx.beginPath();
+          ctx.arc(px, py, 0.55 + (1 - f) * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r0}, ${g0}, ${b0}, ${g.a * (1 - f) * 2.4})`;
+          ctx.fill();
+        }
+      }
+      ctx.restore();
     }
 
     function resize() {
@@ -60,6 +116,17 @@
 
     function draw(t) {
       ctx.clearRect(0, 0, w, h);
+
+      // distant galaxies sit furthest back
+      for (const g of galaxies) {
+        if (!reduce) {
+          g.x += g.vx; g.y += g.vy;
+          if (g.y < -0.25) { g.y = 1.25; g.x = Math.random(); }
+          if (g.x < -0.25) g.x = 1.25;
+          if (g.x > 1.25) g.x = -0.25;
+        }
+        drawGalaxy(g, t);
+      }
 
       // soft blue dust catching the background bloom
       for (const m of motes) {

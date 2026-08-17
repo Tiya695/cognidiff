@@ -1,4 +1,4 @@
-/* CogniDiff — procedural brain point cloud.
+/* CogniDiff, procedural brain point cloud.
  *
  * The brain is generated, not loaded: a folded implicit surface sampled into
  * ~90k points, plus a cerebellum, a brainstem and an interior volume for depth.
@@ -29,7 +29,7 @@
     };
   }
 
-  // Classic 3D value noise with smooth interpolation — enough for gyri.
+  // Classic 3D value noise with smooth interpolation, enough for gyri.
   function makeNoise3(rand) {
     const SIZE = 64;
     const table = new Float32Array(SIZE * SIZE * SIZE);
@@ -68,13 +68,13 @@
    * bulged at the temporal lobes, flattened underneath, split by the
    * longitudinal fissure, and folded by layered noise to make gyri and sulci.
    *
-   * Returns { r, fold } — `fold` is 0 in a sulcus and 1 on a gyral crown, and
+   * Returns { r, fold }, `fold` is 0 in a sulcus and 1 on a gyral crown, and
    * is used to modulate particle brightness. That is what makes the folds
    * legible: a uniformly lit shell reads as sand, whereas brightening the
    * ridges makes the surface look like the convoluted thing it is.
    */
   function cerebrumSurface(x, y, z, noise) {
-    const RX = 0.94, RY = 0.86, RZ = 1.16;
+    const RX = 0.87, RY = 0.96, RZ = 1.14;
 
     // base ellipsoid
     let r = 1 / Math.sqrt((x / RX) ** 2 + (y / RY) ** 2 + (z / RZ) ** 2);
@@ -92,7 +92,7 @@
     // the underside of the cerebrum is flatter than a sphere, but not a plane
     if (y < -0.52) r *= 1 - 0.30 * Math.pow(-y - 0.52, 1.3);
 
-    // longitudinal fissure — the deep midline groove between hemispheres
+    // longitudinal fissure, the deep midline groove between hemispheres
     const midline = Math.exp(-(x * x) / 0.0026);
     r *= 1 - 0.20 * midline * Math.max(0, y + 0.05);
 
@@ -136,9 +136,9 @@
 
     // Weighted toward the surface: the shell is what carries the shape, and a
     // dense interior just fills the silhouette in and hides the folds.
-    const nSurface = Math.floor(count * 0.74);
-    const nInterior = Math.floor(count * 0.09);
-    const nCerebellum = Math.floor(count * 0.12);
+    const nSurface = Math.floor(count * 0.70);
+    const nInterior = Math.floor(count * 0.08);
+    const nCerebellum = Math.floor(count * 0.13);
     const nStem = count - nSurface - nInterior - nCerebellum;
 
     const pos = new Float32Array(count * 3);
@@ -165,7 +165,7 @@
 
     // --- cerebral surface ---------------------------------------------
     // Points are rejection-sampled toward the gyral crowns rather than spread
-    // evenly. Brightness alone was not enough — an evenly scattered shell reads
+    // evenly. Brightness alone was not enough, an evenly scattered shell reads
     // as grain no matter how it is shaded, whereas biasing the *placement*
     // makes the particles themselves trace the folds, which is what gives a
     // real point-cloud scan its filamentary look.
@@ -183,8 +183,8 @@
         dx * r * jitter,
         dy * r * jitter + 0.06,
         dz * r * jitter,
-        0.42 + rand() * 0.62 + fold * 0.45,
-        Math.min(1, 0.10 + rand() * 0.22 + brightness * 0.80),
+        0.32 + rand() * 0.38 + fold * 0.30,
+        Math.min(0.58, 0.045 + rand() * 0.105 + brightness * 0.30),
         0
       );
       placed++;
@@ -199,8 +199,8 @@
       const depth = 0.30 + rand() * 0.58;
       push(
         dx * r * depth, dy * r * depth + 0.06, dz * r * depth,
-        0.32 + rand() * 0.34,
-        0.05 + rand() * 0.13,
+        0.24 + rand() * 0.22,
+        0.020 + rand() * 0.048,
         1
       );
     }
@@ -220,8 +220,8 @@
         CB.x + dx * r * shell,
         CB.y + dy * r * shell,
         CB.z + dz * r * shell,
-        0.50 + rand() * 0.70,
-        0.34 + rand() * 0.50,
+        0.34 + rand() * 0.40,
+        0.075 + rand() * 0.235,
         2
       );
     }
@@ -229,14 +229,15 @@
     // --- brainstem --------------------------------------------------------
     for (let k = 0; k < nStem; k++) {
       const t = rand();                        // 0 top → 1 bottom
-      const rad = (0.20 - 0.075 * t) * (0.65 + rand() * 0.35);
+      // shell-weighted so the column has edges instead of fading to fog
+      const rad = (0.185 - 0.055 * t) * (0.80 + rand() * 0.20);
       const ang = rand() * Math.PI * 2;
       push(
         Math.cos(ang) * rad,
-        -0.42 - t * 0.78,
-        -0.22 + Math.sin(ang) * rad * 0.85,
-        0.45 + rand() * 0.55,
-        0.30 + rand() * 0.46,
+        -0.46 - t * 0.62,
+        -0.20 + Math.sin(ang) * rad * 0.85,
+        0.32 + rand() * 0.30,
+        0.070 + rand() * 0.190,
         3
       );
     }
@@ -255,7 +256,7 @@
 
     const verts = [];
     for (let a = 0; a < nodes.length && verts.length / 6 < maxLines; a++) {
-      // connect each node to its nearest few neighbours — that local structure
+      // connect each node to its nearest few neighbours, that local structure
       // is what makes it read as a network instead of random chords
       const dists = [];
       for (let b = 0; b < nodes.length; b++) {
@@ -317,22 +318,24 @@
       if (uPulse >= 0.0) {
         float axis  = (position.z + 1.35) / 2.7;          // 0 back → 1 front
         float band  = abs(axis - uPulse);
-        heat = max(heat, smoothstep(0.13, 0.0, band) * (1.0 - m));
+        heat = max(heat, smoothstep(0.15, 0.02, band) * 0.75 * (1.0 - m));
       }
 
       // region highlight (occipital pole, cerebellum, …)
       if (uFocusRadius > 0.0) {
         float d = distance(position, uFocus);
-        heat = max(heat, smoothstep(uFocusRadius, uFocusRadius * 0.25, d) * (1.0 - m));
+        // stops short of full intensity at the centre so the highlight reads
+        // as a bloom on the region rather than a hole burned through it
+        heat = max(heat, smoothstep(uFocusRadius, uFocusRadius * 0.55, d) * 0.7 * (1.0 - m));
       }
 
       vHeat = heat;
-      vAlpha = aAlpha * mix(1.0, 0.85, m) + heat * 0.55;
+      vAlpha = aAlpha * mix(1.0, 0.85, m) + heat * 0.07;
 
       vec4 mv = modelViewMatrix * vec4(p, 1.0);
       gl_Position = projectionMatrix * mv;
 
-      float s = aSize * uScale * (1.0 + heat * 1.9);
+      float s = aSize * uScale * (1.0 + heat * 0.75);
       gl_PointSize = s * uPixelRatio * (34.0 / max(-mv.z, 0.1));
     }
   `;
@@ -348,13 +351,13 @@
     varying float vHeat;
 
     void main() {
-      // round sprite with a soft falloff — no texture needed
+      // round sprite with a soft falloff, no texture needed
       vec2 c = gl_PointCoord - vec2(0.5);
       float d = dot(c, c);
       if (d > 0.25) discard;
 
       float falloff = 1.0 - smoothstep(0.0, 0.25, d);
-      falloff = pow(falloff, 1.6);
+      falloff = pow(falloff, 2.3);
 
       vec3 col = mix(uColor, uHotColor, vHeat);
       gl_FragColor = vec4(col, falloff * vAlpha * uOpacity);
@@ -412,7 +415,7 @@
         uPixelRatio:  { value: dpr },
         uScale:       { value: wide ? 1.0 : 0.85 },
         uColor:       { value: new T.Color(options.color || '#5ec8f5') },
-        uHotColor:    { value: new T.Color(options.hotColor || '#e9fbff') },
+        uHotColor:    { value: new T.Color(options.hotColor || '#a9e8ff') },
         uOpacity:     { value: 1 },
       };
 
@@ -511,7 +514,7 @@
       if (!this.reduceMotion) {
         this.group.rotation.y += this.autoSpin * dt;
 
-        // mouse parallax, eased — the depth cue that makes it feel volumetric
+        // mouse parallax, eased, the depth cue that makes it feel volumetric
         this.parallax.x += (this.pointer.x * 0.18 - this.parallax.x) * 0.045;
         this.parallax.y += (this.pointer.y * 0.12 - this.parallax.y) * 0.045;
       }

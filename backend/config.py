@@ -2,7 +2,7 @@
 
 Every CogniScore CogniDiff stores carries the four version fields defined here,
 so any score in the database can be traced back to the exact model, baseline and
-feature definitions that produced it — and reproduced.
+feature definitions that produced it, and reproduced.
 """
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ CORS_ORIGINS = [
 ]
 
 # --------------------------------------------------------------------------
-# version tracking — written onto every cogniscores row
+# version tracking, written onto every cogniscores row
 # --------------------------------------------------------------------------
 
 
@@ -100,7 +100,7 @@ def version_fields(baseline_version: int = 1) -> dict:
 
 
 # --------------------------------------------------------------------------
-# determinism — an unseeded experiment cannot be defended at viva
+# determinism, an unseeded experiment cannot be defended at viva
 # --------------------------------------------------------------------------
 
 SEED = int(os.getenv("COGNIDIFF_SEED", "42"))
@@ -185,7 +185,7 @@ RECALIBRATION_SESSIONS = 30
 BASELINE_WINDOW_DAYS = 14
 
 #: Composite weighting between passive keystroke monitoring and the active
-#: mini-tasks. Chosen by the sweep in ml/weight_sensitivity.py — see
+#: mini-tasks. Chosen by the sweep in ml/weight_sensitivity.py, see
 #: docs/weight_sensitivity.md for the full table. Not a preference; a measured
 #: trade-off.
 #:
