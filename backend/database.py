@@ -163,6 +163,20 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 
 CREATE INDEX IF NOT EXISTS idx_audit_user ON security_audit_log(user_id, id DESC);
 
+-- Deletion ledger. Deliberately NOT cleared by delete_user_data: it is what
+-- makes the deletion promise survive a restore. A backup taken before the
+-- request still contains the user's rows, so every restore replays this ledger
+-- before the database goes back into service. See docs/backup_recovery.md.
+-- It holds a user id and a timestamp — no health data.
+CREATE TABLE IF NOT EXISTS deletion_requests (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      TEXT NOT NULL,
+    requested_at TEXT NOT NULL,
+    rows_removed INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_deletion_user ON deletion_requests(user_id);
+
 CREATE TABLE IF NOT EXISTS federated_rounds (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     round_no    INTEGER NOT NULL,
@@ -382,6 +396,21 @@ def has_active_consent(user_id: str, doctor_id: str) -> bool:
     return row is not None
 
 
+#: Every table holding a user's data, as literal statements rather than a loop
+#: over interpolated table names. An f-string here would be safe — the names are
+#: constants — but it would also be the only interpolated SQL in the project,
+#: and a codebase where "we only interpolate the safe ones" is true is one where
+#: the rule cannot be checked mechanically. test_attack_07c greps for exactly this.
+DELETIONS = (
+    ("keystroke_sessions", "DELETE FROM keystroke_sessions WHERE user_id = ?"),
+    ("cogniscores",        "DELETE FROM cogniscores WHERE user_id = ?"),
+    ("task_results",       "DELETE FROM task_results WHERE user_id = ?"),
+    ("daily_context",      "DELETE FROM daily_context WHERE user_id = ?"),
+    ("consent_grants",     "DELETE FROM consent_grants WHERE user_id = ?"),
+    ("session_exclusions", "DELETE FROM session_exclusions WHERE user_id = ?"),
+)
+
+
 def delete_user_data(user_id: str) -> dict[str, int]:
     """Erase every row belonging to a user across every table.
 
@@ -389,20 +418,6 @@ def delete_user_data(user_id: str) -> dict[str, int]:
     this returns, so the deletion itself remains accountable while the user's
     health data is gone.
     """
-    # Written out as literal statements rather than a loop over table names.
-    # An f-string here would be safe — the names are constants — but it would
-    # also be the only interpolated SQL in the project, and a codebase where
-    # "we only interpolate the safe ones" is true is a codebase where the rule
-    # cannot be checked mechanically. test_attack_07c greps for exactly this.
-    DELETIONS = (
-        ("keystroke_sessions", "DELETE FROM keystroke_sessions WHERE user_id = ?"),
-        ("cogniscores",        "DELETE FROM cogniscores WHERE user_id = ?"),
-        ("task_results",       "DELETE FROM task_results WHERE user_id = ?"),
-        ("daily_context",      "DELETE FROM daily_context WHERE user_id = ?"),
-        ("consent_grants",     "DELETE FROM consent_grants WHERE user_id = ?"),
-        ("session_exclusions", "DELETE FROM session_exclusions WHERE user_id = ?"),
-    )
-
     removed: dict[str, int] = {}
     conn = connect()
     try:
@@ -417,7 +432,42 @@ def delete_user_data(user_id: str) -> dict[str, int]:
             "UPDATE security_audit_log SET details = NULL WHERE user_id = ?",
             (user_id,),
         )
+        # Record the request itself. This row is intentionally NOT deleted —
+        # it carries no health data, and it is what lets a restore honour a
+        # deletion that happened after the backup was taken.
+        cur.execute(
+            "INSERT INTO deletion_requests (user_id, requested_at, rows_removed) "
+            "VALUES (?, ?, ?)",
+            (user_id, utcnow(), sum(removed.values())),
+        )
         conn.commit()
     finally:
         conn.close()
     return removed
+
+
+def replay_deletions(path=None) -> dict:
+    """Re-apply every recorded deletion request against a database.
+
+    Run after restoring a backup and before the database goes back into
+    service. A backup taken before a deletion request still contains that
+    user's rows; without this replay, restoring it would resurrect data the
+    user asked us to erase.
+    """
+    target = path or _db_path
+    conn = sqlite3.connect(str(target))
+    conn.row_factory = sqlite3.Row
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT DISTINCT user_id FROM deletion_requests")
+        user_ids = [r["user_id"] for r in cur.fetchall()]
+
+        removed = 0
+        for user_id in user_ids:
+            for _table, sql in DELETIONS:
+                cur.execute(sql, (user_id,))
+                removed += cur.rowcount
+        conn.commit()
+        return {"users_replayed": len(user_ids), "rows_removed": removed}
+    finally:
+        conn.close()

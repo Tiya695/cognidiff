@@ -24,15 +24,17 @@
   letter-spacing: .2em; text-transform: uppercase;
 }
 .appbar__tag {
-  font-family: var(--mono); font-size: 9px;
+  font-family: var(--mono); font-size: 10.5px;
   letter-spacing: .26em; color: var(--faint);
 }
 .appbar nav { margin-left: auto; display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; }
 .appbar nav a, .appbar nav button {
   padding: .5rem .9rem;
   border: 1px solid transparent; border-radius: 999px;
-  background: none; color: var(--muted);
-  font-family: var(--mono); font-size: 10px;
+  /* Navigation is primary content, not chrome — it gets the brighter tone and
+     a size that clears 4.5:1 rather than sitting just under it. */
+  background: none; color: var(--text-dim);
+  font-family: var(--mono); font-size: 11px;
   letter-spacing: .16em; text-transform: uppercase;
   text-decoration: none; cursor: pointer;
   transition: color .18s, background .18s, border-color .18s;
@@ -115,14 +117,14 @@
 }
 .ring__of {
   margin: .35rem 0 0;
-  font-family: var(--mono); font-size: 9.5px;
+  font-family: var(--mono); font-size: 10.5px;
   letter-spacing: .22em; color: var(--faint);
 }
 .ring__conf { margin: .75rem 0 0; }
 
 .score__side { min-width: 0; }
 .score__side dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem 1.4rem; margin: 1.2rem 0 0; }
-.score__side dt { font-family: var(--mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.score__side dt { font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
 .score__side dd { margin: .3rem 0 0; font-family: var(--mono); font-size: 1.02rem; color: var(--text); }
 
 /* ==========================================================================
@@ -145,7 +147,7 @@
 .card__foot {
   margin: 1rem 0 0; padding-top: .85rem;
   border-top: 1px solid rgba(127, 216, 255, .08);
-  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
   color: var(--faint);
 }
 
@@ -155,7 +157,7 @@
   border: 1px solid var(--line); border-radius: 10px;
   background: rgba(8, 20, 48, .4);
 }
-.stat__k { font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+.stat__k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
 .stat__v { margin: .45rem 0 0; font-family: var(--mono); font-size: 1.4rem; color: var(--text); font-variant-numeric: tabular-nums; }
 .stat__n { margin: .3rem 0 0; font-size: .78rem; color: var(--muted); }
 
@@ -192,16 +194,16 @@
 }
 .summary-src {
   margin: .9rem 0 0;
-  font-family: var(--mono); font-size: 9.5px;
+  font-family: var(--mono); font-size: 10.5px;
   letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
 }
 
 /* tables */
 table.data { width: 100%; border-collapse: collapse; font-size: .9rem; }
-table.data caption { text-align: left; padding-bottom: .7rem; color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+table.data caption { text-align: left; padding-bottom: .7rem; color: var(--faint); font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; }
 table.data th, table.data td { padding: .62rem .7rem; text-align: left; border-bottom: 1px solid rgba(127, 216, 255, .08); }
 table.data th {
-  font-family: var(--mono); font-size: 9.5px;
+  font-family: var(--mono); font-size: 10.5px;
   letter-spacing: .16em; text-transform: uppercase;
   color: var(--faint); font-weight: 500; white-space: nowrap;
 }
@@ -213,7 +215,7 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
 .field { display: block; margin-bottom: 1rem; }
 .field > span {
   display: block; margin-bottom: .45rem;
-  font-family: var(--mono); font-size: 9.5px;
+  font-family: var(--mono); font-size: 10.5px;
   letter-spacing: .18em; text-transform: uppercase; color: var(--faint);
 }
 .field input, .field select, .field textarea {
@@ -242,7 +244,7 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
 
 .toast {
   margin: 1rem 0 0;
-  font-family: var(--mono); font-size: 11px; line-height: 1.6;
+  font-family: var(--mono); font-size: 12px; line-height: 1.6;
   color: var(--cyan);
 }
 .toast.err { color: var(--red); }
@@ -278,7 +280,7 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
 .auth-demo {
   margin-top: 1.4rem; padding-top: 1.1rem;
   border-top: 1px solid rgba(127, 216, 255, .08);
-  font-family: var(--mono); font-size: 10px; line-height: 1.8;
+  font-family: var(--mono); font-size: 11px; line-height: 1.8;
   letter-spacing: .08em; color: var(--faint);
 }
 

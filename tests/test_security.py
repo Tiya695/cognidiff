@@ -604,3 +604,67 @@ def test_the_audit_log_never_records_health_content(client, seeded_user):
     for forbidden in ("raw_score", "cogni_score", "wpm_estimate", "key_categories",
                       "password", "avg_iki"):
         assert forbidden not in blob
+
+
+# ---------------------------------------------------------------------------
+# deletion must survive a restore
+# ---------------------------------------------------------------------------
+
+def test_deletion_is_replayed_against_a_restored_backup(client, seeded_user, tmp_path):
+    """The subtle half of the deletion promise.
+
+    A backup taken *before* a user asks to be erased still contains their rows.
+    Restoring it without replaying the deletion ledger would quietly resurrect
+    data the user asked us to delete.
+    """
+    import shutil
+    from backend import database as db
+
+    user_id = seeded_user["user_id"]
+    live = db.get_db_path()
+
+    # a backup from before the deletion, holding this user's sessions
+    before = tmp_path / "before.db"
+    shutil.copy(live, before)
+    assert db.query_one(
+        "SELECT COUNT(*) AS n FROM keystroke_sessions WHERE user_id = ?", (user_id,)
+    )["n"] > 0
+
+    assert client.delete("/api/user/me", headers=seeded_user["headers"]).status_code == 200
+
+    # the ledger records the request and is NOT itself deleted
+    assert db.query_one(
+        "SELECT COUNT(*) AS n FROM deletion_requests WHERE user_id = ?", (user_id,)
+    )["n"] == 1
+
+    # naive restore would bring the rows back …
+    restored = tmp_path / "restored.db"
+    shutil.copy(before, restored)
+    import sqlite3
+    conn = sqlite3.connect(str(restored))
+    resurrected = conn.execute(
+        "SELECT COUNT(*) FROM keystroke_sessions WHERE user_id = ?", (user_id,)
+    ).fetchone()[0]
+    conn.close()
+    assert resurrected > 0, "fixture is not exercising the case"
+
+    # … so the ledger is copied forward and replayed before the database goes live
+    conn = sqlite3.connect(str(restored))
+    conn.execute("CREATE TABLE IF NOT EXISTS deletion_requests ("
+                 "id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, "
+                 "requested_at TEXT NOT NULL, rows_removed INTEGER NOT NULL DEFAULT 0)")
+    conn.execute("INSERT INTO deletion_requests (user_id, requested_at) VALUES (?, ?)",
+                 (user_id, db.utcnow()))
+    conn.commit()
+    conn.close()
+
+    result = db.replay_deletions(restored)
+    assert result["users_replayed"] == 1
+    assert result["rows_removed"] > 0
+
+    conn = sqlite3.connect(str(restored))
+    remaining = conn.execute(
+        "SELECT COUNT(*) FROM keystroke_sessions WHERE user_id = ?", (user_id,)
+    ).fetchone()[0]
+    conn.close()
+    assert remaining == 0, "restore resurrected deleted data"

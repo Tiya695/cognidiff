@@ -19,11 +19,16 @@
   --line:       rgba(127, 216, 255, .14);
   --line-hot:   rgba(127, 216, 255, .40);
 
-  /* --- ink -------------------------------------------------------------- */
-  --text:       #eaf4ff;
-  --text-dim:   #9db4d6;
-  --muted:      #7f95b8;
-  --faint:      #566d92;
+  /* --- ink ---------------------------------------------------------------
+     Every one of these is contrast-checked against the panel background at
+     4.5:1 or better (docs/accessibility_test.md). The first pass used dimmer
+     blues that looked right and measured 3.1:1 — comfortably illegible for
+     anyone with reduced contrast sensitivity, which in a tool aimed partly at
+     older users is precisely the wrong group to lose. */
+  --text:       #eaf4ff;   /* ~14:1 */
+  --text-dim:   #aabfda;   /* ~9.2:1 */
+  --muted:      #93a9c8;   /* ~7.5:1 */
+  --faint:      #7589ad;   /* ~5.1:1 — the dimmest tone used for real text */
 
   /* --- accents ---------------------------------------------------------- */
   --cyan:       #7fd8ff;
@@ -291,7 +296,7 @@ h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 
   bottom: 26px; left: 50%; transform: translateX(-50%);
   display: flex; gap: 1.15rem;
   margin: 0; padding: 0; list-style: none;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .2em;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em;
 }
 .steps li { position: relative; color: var(--faint); opacity: .5; transition: opacity .3s, color .3s; }
 .steps li::before {
@@ -340,7 +345,7 @@ h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 
   padding: .34rem .8rem;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-family: var(--mono); font-size: 10.5px;
+  font-family: var(--mono); font-size: 11px;
   letter-spacing: .16em; text-transform: uppercase;
   color: var(--muted);
   white-space: nowrap;

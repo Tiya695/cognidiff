@@ -150,7 +150,11 @@ def apply_retention() -> list[Path]:
 # restore
 # ---------------------------------------------------------------------------
 
-def restore_backup(name: str, target: Path | None = None) -> Path:
+def restore_backup(
+    name: str,
+    target: Path | None = None,
+    replay_deletions_on_restore: bool = True,
+) -> Path:
     """Decrypt and restore. The existing database is moved aside, never
     overwritten in place — a failed restore must not also destroy what was
     there."""
@@ -183,6 +187,16 @@ def restore_backup(name: str, target: Path | None = None) -> Path:
     finally:
         conn.close()
 
+    # Honour deletions that happened after this backup was taken. A backup from
+    # before a user asked to be erased still contains their rows; restoring it
+    # without this replay would quietly resurrect them.
+    if replay_deletions_on_restore:
+        from . import database as db
+        result = db.replay_deletions(target)
+        if result["rows_removed"]:
+            print(f"  replayed {result['users_replayed']} deletion request(s), "
+                  f"removed {result['rows_removed']} row(s)")
+
     return target
 
 
@@ -198,7 +212,9 @@ def verify_restore(name: str | None = None) -> dict:
 
     scratch = BACKUP_DIR / ".verify.db"
     scratch.unlink(missing_ok=True)
-    restore_backup(chosen.name, target=scratch)
+    # Verification compares the backup against live as-taken, so the deletion
+    # replay is skipped here — it would make the row counts differ by design.
+    restore_backup(chosen.name, target=scratch, replay_deletions_on_restore=False)
 
     # Literal statements rather than a loop over interpolated table names, so
     # there is no string-built SQL anywhere in the project for a scanner — or a
