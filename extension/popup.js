@@ -81,17 +81,24 @@ $('toggle').addEventListener('change', async (e) => {
 });
 
 // ---------------------------------------------------------------------------
-// allowlist
+// monitored sites
+//
+// Adding a site means asking Chrome for the host permission. That call must
+// happen here, in the popup, because chrome.permissions.request() only works
+// from a user gesture; the service worker then registers the content script
+// once the permission is actually held.
 // ---------------------------------------------------------------------------
 
-function renderAllowlist(list) {
+const patternsFor = (host) => [`https://${host}/*`, `http://${host}/*`];
+
+function renderSites(list) {
   const ul = $('allowlist');
   ul.textContent = '';
 
-  if (list.length === 0) {
+  if (!list || list.length === 0) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.textContent = 'No sites added, monitoring is inactive.';
+    li.textContent = 'No sites approved yet. Nothing is being captured.';
     ul.appendChild(li);
     return;
   }
@@ -109,15 +116,34 @@ function renderAllowlist(list) {
     rm.textContent = '×';
     rm.setAttribute('aria-label', `Stop monitoring ${host}`);
     rm.addEventListener('click', async () => {
-      const next = list.filter((h) => h !== host);
-      await chrome.storage.local.set({ site_allowlist: next });
-      renderAllowlist(next);
-      say(`Removed ${host}.`);
+      const res = await send({ type: 'remove_site', host });
+      renderSites(res.sites);
+      await refreshCurrentSite();
+      say(`Stopped monitoring ${host}. Chrome access revoked.`);
     });
     li.appendChild(rm);
 
     ul.appendChild(li);
   }
+}
+
+/** Ask Chrome for the host, then have the worker register the script. */
+async function requestSite(host) {
+  let granted = false;
+  try {
+    granted = await chrome.permissions.request({ origins: patternsFor(host) });
+  } catch (err) {
+    say('Chrome refused that site pattern.', true);
+    return false;
+  }
+  if (!granted) { say('Permission declined, nothing changed.', true); return false; }
+
+  const res = await send({ type: 'add_site', host });
+  if (!res.added) { say('Could not enable that site.', true); return false; }
+
+  renderSites(res.sites);
+  say(`Now monitoring ${host}. Reload that tab to start capturing.`);
+  return true;
 }
 
 $('addForm').addEventListener('submit', async (e) => {
@@ -131,15 +157,35 @@ $('addForm').addEventListener('submit', async (e) => {
     say('Enter a valid domain, for example docs.google.com', true);
     return;
   }
+  if (await requestSite(host)) input.value = '';
+});
 
-  const { site_allowlist = [] } = await chrome.storage.local.get('site_allowlist');
-  if (site_allowlist.includes(host)) { say('Already on the list.'); return; }
+// --- the site you are actually on ------------------------------------------
 
-  const next = [...site_allowlist, host];
-  await chrome.storage.local.set({ site_allowlist: next });
-  renderAllowlist(next);
-  input.value = '';
-  say(`Now monitoring ${host}. You may need to reload that tab.`);
+let currentHost = null;
+
+async function refreshCurrentSite() {
+  const box = $('currentSite');
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.url || !/^https?:/.test(tab.url)) { box.hidden = true; return; }
+
+    currentHost = new URL(tab.url).hostname;
+    const { monitored_sites = [] } = await chrome.storage.local.get('monitored_sites');
+    const already = monitored_sites.includes(currentHost);
+
+    $('curHost').textContent = currentHost;
+    $('enableHere').textContent = already ? 'ALREADY MONITORED' : 'MONITOR THIS SITE';
+    $('enableHere').disabled = already;
+    box.hidden = false;
+  } catch {
+    box.hidden = true;
+  }
+}
+
+$('enableHere').addEventListener('click', async () => {
+  if (!currentHost) return;
+  if (await requestSite(currentHost)) await refreshCurrentSite();
 });
 
 // ---------------------------------------------------------------------------
@@ -277,11 +323,16 @@ $('signOutBtn').addEventListener('click', async () => {
 (async function init() {
   starfield();
 
-  const { monitoring_active = false, site_allowlist = [] } =
-    await chrome.storage.local.get(['monitoring_active', 'site_allowlist']);
+  const { monitoring_active = false } =
+    await chrome.storage.local.get('monitoring_active');
 
   paintToggle(monitoring_active);
-  renderAllowlist(site_allowlist);
+
+  // syncSites() reconciles against the permissions actually held, so a site
+  // revoked from chrome://extensions disappears here too.
+  const { sites } = await send({ type: 'get_sites' });
+  renderSites(sites);
+  await refreshCurrentSite();
   await refreshAccount();
   await refreshStats();
   await refreshLink();

@@ -77,32 +77,49 @@ Open **http://localhost:3000**.
 
 ### The Chrome extension
 
-1. `chrome://extensions` → enable **Developer mode**
-2. **Load unpacked** → select the `extension/` folder
-3. Click the icon, read the privacy notice, turn monitoring **on** — it is off by
-   default, because consent precedes capture
-4. Type on an allowlisted site; batches appear every 60 seconds
+Build an installable zip:
+
+```bash
+python scripts/package_extension.py
+```
+
+Then:
+
+1. Unzip it somewhere permanent (Chrome runs it from that folder)
+2. `chrome://extensions` → enable **Developer mode**
+3. **Load unpacked** → select the unzipped folder
+4. A consent page opens explaining exactly what is and is not captured
+5. Open the popup, sign in with your CogniDiff account, then press
+   **Monitor this site** on somewhere you actually write. **Chrome** asks you to
+   approve that site
+6. Reload the tab and switch monitoring **on**. Batches go up every 60 seconds,
+   and the day is scored once automatically
+
+The extension ships with access to **no websites at all**. Every site is granted
+at runtime through Chrome's own permission prompt, so you can audit and revoke
+the whole list from `chrome://extensions` → Details → Site access, without
+having to trust this app's UI.
 
 ---
 
 ## What is here
 
 ```
-extension/     Chrome MV3 — timing capture, consent popup, allowlist, data controls
+extension/     Chrome MV3 — timing capture, per-site consent, daily roll-up, data controls
 backend/       FastAPI + SQLite — features, quality gate, scoring, auth, RBAC, audit
 ml/            baseline · IsolationForest · LSTM · SHAP · XGBoost · drift · ablation · federated
 frontend/      landing page, dashboard, mini-tasks, clinician report (no build step)
-tests/         187 tests, including all twelve attacker simulations
+tests/         189 tests, including all twelve attacker simulations
 docs/          feature definitions, audits, evaluation protocol, paper
 ```
 
 ### The web app
 
 **Landing page** — a seven-state WebGL particle brain the reader scrolls through,
-from `> ARRIVAL` to `> SUMMARY`. Roughly 90,000 points sampled onto a folded
-cortical surface, rejection-biased toward the gyral crowns so the convolutions
-read as filaments rather than grain. Camera, morph and highlight state are driven
-by GSAP ScrollTrigger.
+from `> ARRIVAL` to `> SUMMARY`. Around 140,000 points filling a folded
+cerebral volume, denser at the cortex, so the scan reads as a solid body of
+light rather than a hollow shell. Camera, morph, region highlight and a
+cursor-driven light are all uniforms on one shader, driven by GSAP ScrollTrigger.
 
 **Dashboard** — animated CogniScore ring with confidence band, alert banner,
 7/30-day trend charts, the three changes that moved the score in plain English,
@@ -120,12 +137,13 @@ features, the consent record and a prominent disclaimer.
 ## Running things
 
 ```bash
-python -m pytest tests/ -q                              # 187 tests
+python -m pytest tests/ -q                              # 189 tests
 python -m pytest tests/ --cov=backend --cov=ml          # coverage
 python -m pytest tests/test_security.py -v              # the twelve attacks
 ```
 
 ```bash
+python scripts/package_extension.py  # build the installable extension zip
 python -m ml.weight_sensitivity      # composite weighting sweep
 python -m ml.false_positive_test     # false-positive validation
 python -m ml.federated               # federated learning simulation
@@ -144,7 +162,7 @@ python -m bandit -r backend/ ml/     # static analysis
 
 | | |
 |---|---|
-| Tests | **187 passing** |
+| Tests | **189 passing** |
 | Attacker simulations | **12 / 12 blocked** |
 | `bandit` | **0 HIGH, 0 MEDIUM** across 4,895 LOC |
 | `pip-audit` | 1 finding, accepted and documented (unreachable code path) |

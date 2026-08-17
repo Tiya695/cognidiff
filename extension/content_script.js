@@ -288,22 +288,30 @@
     console.info('[CogniDiff] monitoring stopped.');
   }
 
-  async function isAllowlisted() {
-    const { site_allowlist = [] } = await chrome.storage.local.get('site_allowlist');
-    if (site_allowlist.length === 0) return true;   // manifest already scopes us
-    return site_allowlist.some((host) => location.hostname.endsWith(host));
+  /**
+   * Belt and braces. Chrome only injects this script into hosts the user has
+   * granted, so reaching here already means consent, but a stale dynamic
+   * registration after a permission is revoked would be a silent capture on a
+   * site the user thinks they removed. Cheap to check, bad to get wrong.
+   */
+  async function isMonitoredSite() {
+    const { monitored_sites = [] } = await chrome.storage.local.get('monitored_sites');
+    if (monitored_sites.length === 0) return false;
+    return monitored_sites.some(
+      (host) => location.hostname === host || location.hostname.endsWith('.' + host)
+    );
   }
 
   async function sync() {
     const { monitoring_active = false } = await chrome.storage.local.get('monitoring_active');
-    const allowed = monitoring_active && !pageIsSensitive() && (await isAllowlisted());
+    const allowed = monitoring_active && !pageIsSensitive() && (await isMonitoredSite());
 
     if (allowed && !monitoring) { monitoring = true; start(); }
     else if (!allowed && monitoring) { monitoring = false; stop(); }
   }
 
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && ('monitoring_active' in changes || 'site_allowlist' in changes)) sync();
+    if (area === 'local' && ('monitoring_active' in changes || 'monitored_sites' in changes)) sync();
   });
 
   // Flush whatever is pending when the tab goes away, so a real minute of

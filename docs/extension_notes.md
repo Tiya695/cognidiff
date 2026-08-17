@@ -63,10 +63,12 @@ survives the worker being shut down.
 
 | Decision | Why |
 |---|---|
-| **Explicit site allowlist**, not `<all_urls>` | Monitoring three named domains by default is a far narrower permission surface than every page the user visits. `optional_host_permissions` lets the user add sites at runtime. |
+| **No static `content_scripts` at all** | The extension ships with access to zero sites. Every monitored site is requested at runtime with `chrome.permissions.request()`, so Chrome shows its own prompt and the user can audit and revoke from `chrome://extensions`. A fixed `matches` list is consent the user never actually gave. |
+| **Dynamic registration** via `chrome.scripting.registerContentScripts()` | The content script is registered per host only once the permission is genuinely held, and `permissions.onRemoved` unregisters it again. The permission set is the source of truth; our stored list is only a cache. |
 | **`storage`** | The local ring buffer and the user's settings. |
 | **`alarms`** | Retrying the upload queue every five minutes. A `setInterval` would not survive the worker being terminated. |
 | **`activeTab` + `scripting`** | Runtime injection on user-chosen sites. |
+| **`tabs`** | Reading the current tab's host, so the popup can offer "monitor this site" for the page you are actually on. |
 | **`host_permissions: localhost:8000`** | The backend. The only host the extension may contact. |
 | **No `tabs` permission** | Not needed, so not requested. |
 | **CSP `script-src 'self'`** | No remote code in extension pages. |
@@ -114,18 +116,44 @@ normal page and continued into a checkout form never leaves the browser.
 
 ---
 
+## The consent bug this replaced
+
+Worth writing down, because it looked fine and was not.
+
+The first version hardcoded three Google domains into the manifest's
+`content_scripts` and kept a "site allowlist" in the popup. Adding a site to
+that list wrote to `chrome.storage.local` and re-rendered the UI, so it looked
+like it worked. It did nothing: Chrome injects content scripts from the manifest
+`matches`, so the script never ran on the site the user added, while it ran on
+all three Google domains whether they wanted it or not.
+
+The answer to "which sites am I monitored on" was therefore the manifest, not
+the user's choice, and the interface actively implied otherwise. For a consent
+mechanism that is the worst available failure: not an absent control, but a
+control that reports success while doing nothing.
+
+The fix moves the decision into Chrome's own permission system, where the user
+can verify it without having to trust our UI.
+
 ## Testing it
 
 1. `chrome://extensions` → Developer mode → **Load unpacked** → select `extension/`
-2. Open the popup, read the privacy notice, turn monitoring **on** (it is off by
-   default — consent precedes capture)
-3. Type on an allowlisted site for two minutes
-4. `chrome://extensions` → **service worker** → Console: batches appear every
+2. The consent page opens by itself on first install. Read it.
+3. Open the popup, sign in, then press **Monitor this site** on somewhere you
+   actually write. Chrome shows its own permission prompt; accept it.
+4. Reload that tab, then turn monitoring **on** (off by default, consent
+   precedes capture)
+5. Type there for two minutes
+6. `chrome://extensions` → **service worker** → Console: batches appear every
    60 seconds, containing only numbers
-5. Confirm the negative cases produce **zero** batches:
+7. Confirm the negative cases produce **zero** batches:
    - typing in a password field
    - typing on a URL containing `/checkout`
    - typing in an incognito window
-6. **View My Data** shows stored features; **Delete All My Data** clears them
+8. **View My Data** shows stored features; **Delete All My Data** clears them
+9. Confirm the consent is real, not just ours: `chrome://extensions` →
+   CogniDiff → **Details** → **Site access**. Only the sites you approved are
+   listed. Remove one there and it disappears from the popup too, because
+   `permissions.onRemoved` unregisters the script.
 
-Step 5 is the one that matters. Documented in `docs/data_flow_audit.md`.
+Step 7 is the one that matters. Documented in `docs/data_flow_audit.md`.

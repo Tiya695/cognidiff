@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CogniDiff · Before you start</title>
+<link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<main class="wrap">
+
+  <header class="head">
+    <span class="mark" aria-hidden="true"></span>
+    <div>
+      <h1>CogniDiff</h1>
+      <p class="tag">&gt; NEURAL&nbsp;RHYTHM&nbsp;MONITOR</p>
+    </div>
+  </header>
+
+  <section class="lead">
+    <h2>Before anything is captured, read this.</h2>
+    <p>
+      CogniDiff measures the <b>rhythm</b> of your typing: how long you hold each
+      key, the gaps between keystrokes, how often you delete and retype. From
+      that it learns what normal looks like for you, and tells you when it
+      changes.
+    </p>
+    <p>
+      It never records <b>what</b> you type. Not the words, not the characters,
+      not a single letter.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h3>What gets stored</h3>
+    <div class="cols">
+      <div>
+        <p class="col-h col-h--yes">Captured</p>
+        <ul class="list list--yes">
+          <li>Time between keystrokes, in milliseconds</li>
+          <li>How long each key was held down</li>
+          <li>Counts: total keys, backspaces, pauses</li>
+          <li>A key <em>category</em> only: letter, digit, space, backspace, punctuation</li>
+        </ul>
+      </div>
+      <div>
+        <p class="col-h col-h--no">Never captured</p>
+        <ul class="list list--no">
+          <li>The characters you type</li>
+          <li>Words, sentences, messages, searches</li>
+          <li>Passwords, card numbers, one-time codes</li>
+          <li>Page contents, URLs you visit, screenshots</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">
+      "hello world" and "abcde fghij" produce an identical record. The content is
+      not stored in a weaker form, it is not stored at all.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h3>Where it runs is your choice</h3>
+    <p>
+      CogniDiff ships with access to <b>no websites whatsoever</b>. It cannot see
+      any page until you approve that specific site, and Chrome itself will ask
+      you before each one.
+    </p>
+    <p>
+      Approve the places you do ordinary writing, a documents app or a notes app.
+      Everywhere else stays invisible to it.
+    </p>
+    <p>
+      You can check and revoke every approval at any time, from the extension
+      popup or from <code>chrome://extensions</code>.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h3>Capture stops on its own</h3>
+    <p>Even on a site you approved, nothing is recorded when:</p>
+    <ul class="list list--stop">
+      <li>you are typing in a password field</li>
+      <li>the field is a card number, CVV or one-time code</li>
+      <li>the field sits in a form that contains a password</li>
+      <li>the page looks like banking, payment, health or sign-in</li>
+      <li>you are in an incognito window</li>
+    </ul>
+    <p class="note">
+      If one of these appears midway through a minute, the partial recording is
+      deleted rather than sent.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h3>How the score works</h3>
+    <p>
+      Your browser groups typing into one-minute batches. Those are held on your
+      own machine and, once you sign in, synced to your CogniDiff account. Once a
+      day the account works out a <b>CogniScore</b>: how far that day sat from
+      your own established baseline.
+    </p>
+    <p>
+      It needs roughly two weeks of ordinary typing before the baseline means
+      anything. Until then you will see it collecting, not scoring.
+    </p>
+    <p class="disclaim">
+      CogniDiff detects deviation from your own typing baseline. It does not
+      detect, diagnose or confirm cognitive decline, and no clinical accuracy is
+      claimed. Discuss any concern with a qualified healthcare professional.
+    </p>
+  </section>
+
+  <section class="cta">
+    <button class="btn btn-solid" id="accept">I understand, let me choose sites</button>
+    <p class="cta-note">
+      Monitoring stays off until you switch it on. Nothing has been captured yet.
+    </p>
+  </section>
+
+  <footer class="foot">
+    <span>&bull; CAPTURE <b>TIMING ONLY</b></span>
+    <span>&bull; SITE ACCESS <b>NONE UNTIL GRANTED</b></span>
+    <span>&bull; BUILD <b>v1.0</b></span>
+  </footer>
+
+</main>
+
+<script src="welcome.js"></script>
+</body>
+</html>

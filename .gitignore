@@ -25,3 +25,4 @@ ml/models/*.pkl
 Thumbs.db
 .vscode/
 .idea/
+dist/

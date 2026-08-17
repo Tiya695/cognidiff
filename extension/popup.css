@@ -210,6 +210,20 @@ body > *:not(#stars) { position: relative; z-index: 1; }
 .add input::placeholder { color: var(--dim); }
 .add input:focus-visible { outline: 2px solid var(--cyan-hot); outline-offset: 1px; }
 
+/* current site */
+.cursite {
+  padding: 9px 10px; margin-bottom: 9px;
+  border: 1px solid rgba(127, 216, 255, .26);
+  border-radius: 8px;
+  background: rgba(26, 79, 208, .18);
+}
+.cursite-host {
+  margin: 0 0 8px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--cyan); word-break: break-all;
+}
+.cursite .btn { padding: 8px 10px; }
+
 /* account */
 .acct { display: grid; gap: 7px; }
 .acct input {

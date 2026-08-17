@@ -56,12 +56,24 @@
 
   <section class="panel">
     <p class="hdr">&bull;&bull;&bull; MONITORED SITES</p>
+
+    <div id="currentSite" class="cursite" hidden>
+      <p class="cursite-host" id="curHost"></p>
+      <button type="button" id="enableHere" class="btn">MONITOR THIS SITE</button>
+    </div>
+
     <ul id="allowlist" class="allow"></ul>
+
     <form id="addForm" class="add">
-      <label class="sr" for="newSite">Add a site to the allowlist</label>
+      <label class="sr" for="newSite">Add a site by name</label>
       <input id="newSite" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
       <button type="submit" class="btn btn-ghost">ADD</button>
     </form>
+    <p class="acct-note">
+      Chrome will ask you to approve each site. Nothing is captured anywhere you
+      have not approved, and you can revoke any of them here or from
+      chrome://extensions.
+    </p>
   </section>
 
   <section class="panel" id="accountPanel">
