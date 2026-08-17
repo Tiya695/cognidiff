@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — CogniDiff</title>
+<link rel="icon" href="../assets/favicon.png">
+<link rel="stylesheet" href="../assets/neural.css">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+
+<div class="field" aria-hidden="true"></div>
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<a class="hud-close" href="../index.html" aria-label="Back to the introduction">&#10005;</a>
+
+<main class="auth-wrap">
+  <section class="panel auth-card">
+    <p class="tag" id="modeTag">SIGN&nbsp;IN</p>
+    <h1 id="modeTitle">Welcome back.</h1>
+    <p id="modeBlurb">
+      Your cognitive data is yours. Sign in to see your baseline, your trend and
+      exactly who has accessed it.
+    </p>
+
+    <form id="authForm" novalidate>
+      <label class="field">
+        <span>Username</span>
+        <input id="username" name="username" type="text" autocomplete="username"
+               required minlength="3" spellcheck="false" autocapitalize="none">
+      </label>
+
+      <label class="field" id="nameField" hidden>
+        <span>First name <em style="text-transform:none;letter-spacing:0">(optional)</em></span>
+        <input id="firstName" name="firstName" type="text" autocomplete="given-name">
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input id="password" name="password" type="password"
+               autocomplete="current-password" required minlength="8">
+      </label>
+
+      <fieldset class="field" id="roleField" hidden style="border:0;padding:0;margin-bottom:1.4rem">
+        <span style="display:block;margin-bottom:.45rem;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)">Account type</span>
+        <div class="radios">
+          <label><input type="radio" name="role" value="USER" checked> I am monitoring myself</label>
+          <label><input type="radio" name="role" value="DOCTOR"> I am a clinician</label>
+        </div>
+      </fieldset>
+
+      <button class="btn btn--solid" type="submit" id="submitBtn" style="width:100%">Sign in</button>
+    </form>
+
+    <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+    <p class="auth-switch">
+      <span id="switchPrompt">No account yet?</span>
+      <button type="button" id="switchBtn">Create one</button>
+    </p>
+
+    <p class="auth-demo" id="demoHint">
+      DEMO ACCOUNTS &middot; after running <code>seed_demo.py</code><br>
+      USER &nbsp;&nbsp;&nbsp;tiya / cognidiff2026<br>
+      DOCTOR &nbsp;dr.mehta / cognidiff2026
+    </p>
+  </section>
+</main>
+
+<script src="../assets/starfield.js"></script>
+<script src="../assets/api.js"></script>
+<script src="login.js"></script>
+</body>
+</html>

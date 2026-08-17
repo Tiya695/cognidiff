@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "CogniDiff",
+  "version": "1.0.0",
+  "description": "Privacy-preserving cognitive change detection. Captures typing rhythm only — never what you type.",
+
+  "permissions": ["storage", "activeTab", "scripting", "alarms"],
+
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+
+  "host_permissions": ["http://localhost:8000/*"],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CogniDiff",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://docs.google.com/*",
+        "https://mail.google.com/*",
+        "https://keep.google.com/*"
+      ],
+      "js": ["content_script.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

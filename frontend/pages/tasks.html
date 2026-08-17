@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Task assessment — CogniDiff</title>
+<link rel="icon" href="../assets/favicon.png">
+<link rel="stylesheet" href="../assets/neural.css">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to the assessment</a>
+<div class="field" aria-hidden="true"></div>
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<header class="appbar">
+  <span class="appbar__mark" aria-hidden="true">C</span>
+  <span>
+    <span class="appbar__title">CogniDiff</span><br>
+    <span class="appbar__tag">ACTIVE&nbsp;ASSESSMENT</span>
+  </span>
+  <nav aria-label="Main">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html" aria-current="page">Assessment</a>
+    <a href="doctor.html">Report</a>
+    <button type="button" id="signOut">Sign out</button>
+  </nav>
+</header>
+
+<main class="shell page" id="main">
+
+  <div class="page-head">
+    <p class="tag">ACTIVE&nbsp;ASSESSMENT</p>
+    <h1>Four short tasks, under four minutes.</h1>
+    <p>
+      Passive keystroke monitoring catches gradual change. These four tasks catch
+      acute change — the kind that shows up in a single afternoon. Together they
+      give a fuller picture than either does alone. Your results blend into
+      today's CogniScore at a 80/20 weighting.
+    </p>
+  </div>
+
+  <ol class="task-progress" id="progress" aria-label="Task progress">
+    <li class="active"></li><li></li><li></li><li></li>
+  </ol>
+
+  <section class="card" aria-live="polite">
+    <h2 id="taskName">Ready</h2>
+    <div class="task-stage" id="stage">
+      <div>
+        <p style="max-width:44ch;margin:0 auto 1.6rem;color:var(--text-dim)">
+          You will be shown four tasks: word recall, reaction time, pattern memory
+          and a letter scramble. Each takes under a minute. Do them somewhere quiet
+          if you can — and do them at roughly the same time of day each time, so
+          they stay comparable.
+        </p>
+        <button class="btn btn--solid" id="startBtn" type="button">Begin assessment</button>
+      </div>
+    </div>
+    <p class="card__foot" id="taskHint"></p>
+  </section>
+
+  <section class="card" id="resultsCard" style="margin-top:1.15rem" hidden aria-labelledby="hdResults">
+    <h2 id="hdResults">Your results</h2>
+    <div class="statgrid">
+      <div class="stat"><p class="stat__k">Word recall</p><p class="stat__v" id="rRecall">—</p><p class="stat__n">out of 5</p></div>
+      <div class="stat"><p class="stat__k">Reaction time</p><p class="stat__v" id="rReaction">—</p><p class="stat__n">mean, milliseconds</p></div>
+      <div class="stat"><p class="stat__k">Pattern memory</p><p class="stat__v" id="rPattern">—</p><p class="stat__n">sequences correct</p></div>
+      <div class="stat"><p class="stat__k">Letter scramble</p><p class="stat__v" id="rScramble">—</p><p class="stat__n">time to answer</p></div>
+    </div>
+    <p style="margin:1.4rem 0 0" id="compositeLine"></p>
+    <p class="toast" id="submitToast" role="status" aria-live="polite"></p>
+    <p style="margin-top:1.2rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <a class="btn btn--solid" href="dashboard.html">Back to dashboard</a>
+      <button class="btn btn--ghost" type="button" id="againBtn">Run again</button>
+    </p>
+  </section>
+
+  <p class="disclaimer" style="margin-top:1.6rem">
+    <strong>These are screening exercises, not neuropsychological tests.</strong>
+    They measure day-to-day variation in your own performance. They are not
+    validated instruments and no clinical interpretation should be drawn from a
+    single result.
+  </p>
+
+</main>
+
+<script src="../assets/starfield.js"></script>
+<script src="../assets/api.js"></script>
+<script src="tasks.js"></script>
+</body>
+</html>

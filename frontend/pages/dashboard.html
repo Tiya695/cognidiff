@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — CogniDiff</title>
+<link rel="icon" href="../assets/favicon.png">
+<link rel="stylesheet" href="../assets/neural.css">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to dashboard content</a>
+<div class="field" aria-hidden="true"></div>
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<header class="appbar">
+  <span class="appbar__mark" aria-hidden="true">C</span>
+  <span>
+    <span class="appbar__title">CogniDiff</span><br>
+    <span class="appbar__tag">NEURAL&nbsp;RHYTHM&nbsp;MONITOR</span>
+  </span>
+  <nav aria-label="Main">
+    <a href="dashboard.html" aria-current="page">Dashboard</a>
+    <a href="tasks.html">Assessment</a>
+    <a href="doctor.html">Report</a>
+    <a href="../index.html">About</a>
+    <button type="button" id="signOut">Sign out</button>
+  </nav>
+</header>
+
+<main class="shell page" id="main">
+
+  <div class="page-head">
+    <p class="tag">COGNISCORE</p>
+    <h1 id="greeting">Your baseline, today.</h1>
+    <p id="subhead">Loading your monitoring data…</p>
+  </div>
+
+  <!-- alert banner ---------------------------------------------------- -->
+  <div id="alertBanner" class="banner banner--grey" role="status">
+    <span class="banner__icon" id="alertIcon" aria-hidden="true">…</span>
+    <div class="banner__body">
+      <p class="banner__label" id="alertLabel">Loading</p>
+      <p class="banner__text" id="alertText">Fetching your latest reading.</p>
+    </div>
+  </div>
+
+  <!-- recalibration / drift notice ------------------------------------ -->
+  <div id="driftBanner" class="banner banner--blue" role="status" hidden style="margin-top:1rem">
+    <span class="banner__icon" aria-hidden="true">↻</span>
+    <div class="banner__body">
+      <p class="banner__label">Baseline</p>
+      <p class="banner__text" id="driftText"></p>
+    </div>
+  </div>
+
+  <!-- score ------------------------------------------------------------ -->
+  <section class="card" style="margin-top:1.15rem" aria-labelledby="scoreHd">
+    <h2 id="scoreHd">Today's reading</h2>
+    <div class="score">
+      <div class="ring">
+        <svg viewBox="0 0 120 120" role="img" aria-labelledby="ringTitle ringDesc">
+          <title id="ringTitle">CogniScore</title>
+          <desc id="ringDesc">A ring showing today's CogniScore out of 100.</desc>
+          <circle class="ring__track" cx="60" cy="60" r="52"></circle>
+          <circle class="ring__value" id="ringValue" cx="60" cy="60" r="52"
+                  stroke-dasharray="0 327" ></circle>
+        </svg>
+        <div class="ring__inner">
+          <p class="ring__num" id="scoreNum">—</p>
+          <p class="ring__of">OUT OF 100</p>
+          <p class="ring__conf"><span class="badge badge--grey" id="confBadge">
+            <span class="badge__dot" aria-hidden="true"></span><span id="confText">CONFIDENCE —</span>
+          </span></p>
+        </div>
+      </div>
+
+      <div class="score__side">
+        <p id="scoreExplain" style="margin:0;color:var(--text-dim)">
+          100 means today matches your own baseline exactly. This is never
+          compared against anybody else.
+        </p>
+        <dl>
+          <div><dt>Raw score</dt><dd id="mRaw">—</dd></div>
+          <div><dt>Context adjusted</dt><dd id="mAdj">—</dd></div>
+          <div><dt>Task blend</dt><dd id="mBlend">—</dd></div>
+          <div><dt>Deviation</dt><dd id="mDev">—</dd></div>
+          <div><dt>Tomorrow (LSTM)</dt><dd id="mPredict">—</dd></div>
+          <div><dt>Model agreement</dt><dd id="mAgree">—</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="card__foot" id="versionFoot"></p>
+  </section>
+
+  <!-- trends ------------------------------------------------------------ -->
+  <div class="grid grid--2" style="margin-top:1.15rem">
+    <section class="card" aria-labelledby="hd7">
+      <h2 id="hd7">7-day trend</h2>
+      <div class="chart-wrap"><canvas id="chart7"></canvas></div>
+      <p class="sr-only" id="chart7Summary">Loading trend summary.</p>
+    </section>
+    <section class="card" aria-labelledby="hd30">
+      <h2 id="hd30">30-day trend</h2>
+      <div class="chart-wrap"><canvas id="chart30"></canvas></div>
+      <p class="sr-only" id="chart30Summary">Loading trend summary.</p>
+    </section>
+  </div>
+
+  <!-- explanation + summary --------------------------------------------- -->
+  <div class="grid grid--2" style="margin-top:1.15rem">
+    <section class="card" aria-labelledby="hdChanges">
+      <h2 id="hdChanges">What changed &middot; top 3</h2>
+      <ul class="changes" id="changes">
+        <li class="empty">Waiting for enough data.</li>
+      </ul>
+      <p class="card__foot" id="changesMethod"></p>
+    </section>
+
+    <section class="card" aria-labelledby="hdSummary">
+      <h2 id="hdSummary">Your daily summary</h2>
+      <p class="summary-text" id="summaryText">Generating…</p>
+      <p class="summary-src" id="summarySrc"></p>
+      <p style="margin-top:1.1rem">
+        <button class="btn btn--ghost" id="refreshSummary" type="button">Regenerate</button>
+      </p>
+    </section>
+  </div>
+
+  <!-- data quality ------------------------------------------------------ -->
+  <section class="card" style="margin-top:1.15rem" aria-labelledby="hdQuality">
+    <h2 id="hdQuality">Data quality</h2>
+    <div class="statgrid">
+      <div class="stat"><p class="stat__k">Sessions analysed</p><p class="stat__v" id="qAnalysed">—</p></div>
+      <div class="stat"><p class="stat__k">Excluded on quality</p><p class="stat__v" id="qExcluded">—</p></div>
+      <div class="stat"><p class="stat__k">Exclusion rate</p><p class="stat__v" id="qRate">—</p></div>
+      <div class="stat"><p class="stat__k">Baseline sessions</p><p class="stat__v" id="qBaseline">—</p></div>
+    </div>
+    <div class="scroll-x" style="margin-top:1.2rem">
+      <table class="data">
+        <caption>Why sessions were excluded</caption>
+        <thead><tr><th>Reason</th><th>Meaning</th><th class="num">Count</th></tr></thead>
+        <tbody id="qReasons"><tr><td colspan="3" class="empty">No exclusions recorded.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- context ----------------------------------------------------------- -->
+  <section class="card" style="margin-top:1.15rem" aria-labelledby="hdContext">
+    <h2 id="hdContext">Today's context <span style="text-transform:none;letter-spacing:0;color:var(--muted)">— optional</span></h2>
+    <p style="margin:0 0 1.2rem;color:var(--text-dim);font-size:.93rem">
+      Sleep, stress and illness all move typing without anything cognitive changing.
+      Telling us softens today's reading instead of letting it look like a decline.
+    </p>
+    <form id="contextForm">
+      <fieldset style="border:0;padding:0;margin:0 0 1.1rem">
+        <legend style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);padding:0">Sleep quality</legend>
+        <div class="radios" style="margin-top:.5rem" id="sleepRadios"></div>
+      </fieldset>
+      <fieldset style="border:0;padding:0;margin:0 0 1.1rem">
+        <legend style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);padding:0">Stress level</legend>
+        <div class="radios" style="margin-top:.5rem" id="stressRadios"></div>
+      </fieldset>
+      <div class="radios" style="margin-bottom:1.2rem">
+        <label><input type="checkbox" id="ctxUnwell"> Feeling unwell</label>
+        <label><input type="checkbox" id="ctxDevice"> New keyboard or device</label>
+      </div>
+      <button class="btn" type="submit">Save today's context</button>
+      <p class="toast" id="contextToast" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- access control ---------------------------------------------------- -->
+  <div class="grid grid--2" style="margin-top:1.15rem">
+    <section class="card" aria-labelledby="hdAccess">
+      <h2 id="hdAccess">Manage access</h2>
+      <p style="margin:0 0 1.1rem;color:var(--text-dim);font-size:.93rem">
+        A clinician can only open your report while you have granted them access.
+        Revoking takes effect on their very next request — there is no grace period.
+      </p>
+      <form id="grantForm" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.1rem">
+        <label class="sr-only" for="doctorUser">Doctor username</label>
+        <input id="doctorUser" type="text" placeholder="doctor username" spellcheck="false"
+               style="flex:1;min-width:160px;padding:.65rem .85rem;background:rgba(4,9,28,.68);border:1px solid var(--line);border-radius:9px;color:var(--text);font:inherit">
+        <button class="btn btn--ghost" type="submit">Grant</button>
+      </form>
+      <table class="data">
+        <caption>Who has access</caption>
+        <thead><tr><th>Clinician</th><th>Granted</th><th>Status</th><th></th></tr></thead>
+        <tbody id="grantRows"><tr><td colspan="4" class="empty">Nobody has access to your data.</td></tr></tbody>
+      </table>
+      <p class="toast" id="grantToast" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card" aria-labelledby="hdAudit">
+      <h2 id="hdAudit">Access log</h2>
+      <p style="margin:0 0 1.1rem;color:var(--text-dim);font-size:.93rem">
+        Every action taken on your data, by anyone — including you.
+      </p>
+      <div class="scroll-x" style="max-height:320px;overflow-y:auto">
+        <table class="data">
+          <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Result</th></tr></thead>
+          <tbody id="auditRows"><tr><td colspan="4" class="empty">No entries yet.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- actions ------------------------------------------------------------ -->
+  <section class="card" style="margin-top:1.15rem" aria-labelledby="hdActions">
+    <h2 id="hdActions">Actions</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:.6rem">
+      <a class="btn" href="doctor.html">Generate doctor report</a>
+      <a class="btn" href="tasks.html">Task assessment</a>
+      <button class="btn btn--ghost" type="button" id="btnFit">Rebuild my baseline</button>
+      <button class="btn btn--ghost" type="button" id="btnExport">Export my data</button>
+      <button class="btn btn--danger" type="button" id="btnDelete">Delete all my data</button>
+    </div>
+    <p class="toast" id="actionToast" role="status" aria-live="polite"></p>
+  </section>
+
+  <p class="disclaimer" style="margin-top:1.6rem">
+    <strong>CogniDiff is a monitoring and screening tool.</strong> It detects
+    deviation from your own typing baseline. It does not detect, diagnose or
+    confirm cognitive decline, and no clinical sensitivity or specificity is
+    claimed, because no clinically labelled data was used. Discuss any concern
+    with a qualified healthcare professional.
+  </p>
+
+</main>
+
+<script src="../vendor/chart.umd.min.js"></script>
+<script src="../assets/starfield.js"></script>
+<script src="../assets/api.js"></script>
+<script src="../assets/charts.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

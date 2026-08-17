@@ -1,0 +1,78 @@
+{
+  "n_days_normal": 400,
+  "n_days_degraded": 100,
+  "flag_threshold": 70.0,
+  "acceptable_fp_ceiling": 15.0,
+  "knee_tolerance": 0.05,
+  "seed": 42,
+  "simulation_assumptions": {
+    "acute_only_fraction": 0.35,
+    "task_completion_rate": 0.3,
+    "note": "The conclusion is conditional on these two parameters. They are estimates, not measurements \u2014 a real deployment should re-run this sweep against observed task-completion rates."
+  },
+  "rows": [
+    {
+      "keystroke_weight": 1.0,
+      "task_weight": 0.0,
+      "label": "100/0",
+      "false_positive_rate_pct": 0.0,
+      "stability_std": 5.009,
+      "responsiveness_points": 19.25,
+      "responsiveness_per_std": 3.843,
+      "acceptable_fp": true
+    },
+    {
+      "keystroke_weight": 0.9,
+      "task_weight": 0.1,
+      "label": "90/10",
+      "false_positive_rate_pct": 0.0,
+      "stability_std": 4.698,
+      "responsiveness_points": 19.59,
+      "responsiveness_per_std": 4.171,
+      "acceptable_fp": true
+    },
+    {
+      "keystroke_weight": 0.8,
+      "task_weight": 0.2,
+      "label": "80/20",
+      "false_positive_rate_pct": 0.25,
+      "stability_std": 4.457,
+      "responsiveness_points": 19.94,
+      "responsiveness_per_std": 4.475,
+      "acceptable_fp": true
+    },
+    {
+      "keystroke_weight": 0.7,
+      "task_weight": 0.3,
+      "label": "70/30",
+      "false_positive_rate_pct": 0.25,
+      "stability_std": 4.296,
+      "responsiveness_points": 20.29,
+      "responsiveness_per_std": 4.723,
+      "acceptable_fp": true
+    },
+    {
+      "keystroke_weight": 0.6,
+      "task_weight": 0.4,
+      "label": "60/40",
+      "false_positive_rate_pct": 0.5,
+      "stability_std": 4.226,
+      "responsiveness_points": 20.64,
+      "responsiveness_per_std": 4.884,
+      "acceptable_fp": true
+    },
+    {
+      "keystroke_weight": 0.5,
+      "task_weight": 0.5,
+      "label": "50/50",
+      "false_positive_rate_pct": 0.75,
+      "stability_std": 4.251,
+      "responsiveness_points": 20.99,
+      "responsiveness_per_std": 4.938,
+      "acceptable_fp": true
+    }
+  ],
+  "peak": "50/50",
+  "chosen": "70/30",
+  "chosen_because": "50/50 has the highest responsiveness-per-unit-instability (4.938), but the curve is flat near the top: 70/30 reaches 4.723 \u2014 within 5% of the peak \u2014 at a lower false-positive rate (0.25% versus 0.75%) and with less reliance on an optional, frequently-skipped input."
+}

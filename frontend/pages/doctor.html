@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cognitive Trend Report — CogniDiff</title>
+<link rel="icon" href="../assets/favicon.png">
+<link rel="stylesheet" href="../assets/neural.css">
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to the report</a>
+<div class="field" aria-hidden="true"></div>
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<header class="appbar no-print">
+  <span class="appbar__mark" aria-hidden="true">C</span>
+  <span>
+    <span class="appbar__title">CogniDiff</span><br>
+    <span class="appbar__tag">CLINICAL&nbsp;REPORT</span>
+  </span>
+  <nav aria-label="Main">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html">Assessment</a>
+    <a href="doctor.html" aria-current="page">Report</a>
+    <button type="button" id="signOut">Sign out</button>
+  </nav>
+</header>
+
+<main class="shell page" id="main">
+
+  <!-- patient picker, doctors only ------------------------------------- -->
+  <section class="card no-print" id="patientPicker" hidden style="margin-bottom:1.4rem" aria-labelledby="hdPatients">
+    <h2 id="hdPatients">Patients who have granted you access</h2>
+    <p style="margin:0 0 1.1rem;color:var(--text-dim);font-size:.93rem">
+      You can only open a report for someone who has explicitly granted you
+      access. They can revoke it at any moment, and it takes effect on your very
+      next request.
+    </p>
+    <div class="scroll-x">
+      <table class="data">
+        <thead><tr><th>Patient</th><th>Granted</th><th>Baseline</th><th></th></tr></thead>
+        <tbody id="patientRows"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="toast" id="patientToast" role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- report ------------------------------------------------------------ -->
+  <div id="report" hidden>
+
+    <div class="report-head">
+      <div>
+        <p class="tag">COGNITIVE&nbsp;TREND&nbsp;REPORT</p>
+        <h1 id="patientName">—</h1>
+        <p style="margin:.5rem 0 0;color:var(--text-dim)" id="monitoringPeriod">—</p>
+      </div>
+      <p class="report-meta" id="reportMeta"></p>
+    </div>
+
+    <div class="statgrid">
+      <div class="stat"><p class="stat__k">Current 14-day mean</p><p class="stat__v" id="sCurrent">—</p><p class="stat__n">CogniScore</p></div>
+      <div class="stat"><p class="stat__k">Prior 31-day mean</p><p class="stat__v" id="sPrevious">—</p><p class="stat__n">CogniScore</p></div>
+      <div class="stat"><p class="stat__k">Change</p><p class="stat__v" id="sChange">—</p><p class="stat__n">versus prior period</p></div>
+      <div class="stat"><p class="stat__k">Trend</p><p class="stat__v" id="sTrend">—</p><p class="stat__n">30-day direction</p></div>
+    </div>
+
+    <div class="grid grid--2" style="margin-top:1.15rem">
+      <section class="card" aria-labelledby="hdStatus">
+        <h2 id="hdStatus">Monitoring status</h2>
+        <p style="margin:0 0 1rem"><span class="badge badge--grey" id="statusBadge">—</span></p>
+        <p style="margin:0 0 1.2rem"><span class="badge badge--grey" id="confidenceBadge">—</span></p>
+        <p id="statusNote" style="margin:0;color:var(--text-dim);font-size:.93rem"></p>
+      </section>
+
+      <section class="card" aria-labelledby="hdData">
+        <h2 id="hdData">Data basis</h2>
+        <dl class="score__side" style="margin:0"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem 1.4rem">
+          <div><dt>Sessions analysed</dt><dd id="dAnalysed">—</dd></div>
+          <div><dt>Excluded on quality</dt><dd id="dExcluded">—</dd></div>
+          <div><dt>Baseline sessions</dt><dd id="dBaseline">—</dd></div>
+          <div><dt>Baseline status</dt><dd id="dStatus">—</dd></div>
+        </div></dl>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:1.15rem" aria-labelledby="hd90">
+      <h2 id="hd90">90-day CogniScore trend</h2>
+      <div class="chart-wrap" style="height:280px"><canvas id="chart90"></canvas></div>
+      <p id="chart90Summary" style="margin:1rem 0 0;color:var(--text-dim);font-size:.9rem"></p>
+    </section>
+
+    <section class="card" style="margin-top:1.15rem" aria-labelledby="hdFeatures">
+      <h2 id="hdFeatures">Most frequently deviating features &middot; last 30 days</h2>
+      <div class="scroll-x">
+        <table class="data">
+          <thead><tr><th>Feature</th><th>Days as top deviation</th><th class="num">Mean deviation</th></tr></thead>
+          <tbody id="featureRows"><tr><td colspan="3" class="empty">No deviations recorded.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="card__foot">
+        Deviation is measured against the individual's own baseline, not a population norm.
+      </p>
+    </section>
+
+    <section class="card" style="margin-top:1.15rem" aria-labelledby="hdConsent">
+      <h2 id="hdConsent">Consent record</h2>
+      <div class="scroll-x">
+        <table class="data">
+          <thead><tr><th>Clinician</th><th>Granted</th><th>Revoked</th><th>Status</th></tr></thead>
+          <tbody id="consentRows"><tr><td colspan="4" class="empty">No access has been granted.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:1.15rem" aria-labelledby="hdProvenance">
+      <h2 id="hdProvenance">Provenance</h2>
+      <p style="margin:0;color:var(--text-dim);font-size:.9rem">
+        Every score in this report is traceable to the exact model, baseline and
+        feature definitions that produced it.
+      </p>
+      <p class="card__foot" id="provenance"></p>
+    </section>
+
+    <p class="disclaimer" style="margin-top:1.6rem" id="disclaimer"></p>
+
+    <p class="no-print" style="margin-top:1.6rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn btn--solid" type="button" id="printBtn">Print / save as PDF</button>
+      <a class="btn btn--ghost" href="dashboard.html">Back to dashboard</a>
+    </p>
+  </div>
+
+  <p class="toast" id="reportToast" role="status" aria-live="polite"></p>
+
+</main>
+
+<script src="../vendor/chart.umd.min.js"></script>
+<script src="../assets/starfield.js"></script>
+<script src="../assets/api.js"></script>
+<script src="../assets/charts.js"></script>
+<script src="doctor.js"></script>
+</body>
+</html>

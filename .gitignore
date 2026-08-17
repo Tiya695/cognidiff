@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+*.pem
+*.key
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data & models — health data never leaves the machine
+cognidiff.db
+cognidiff.db-journal
+cognidiff.db-wal
+*.pkl
+backups/
+ml/models/*.pkl
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

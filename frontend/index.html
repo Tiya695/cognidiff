@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CogniDiff — Neural Mapping</title>
+<meta name="description" content="CogniDiff detects deviation from your own typing baseline — privately, on your terms. A monitoring and screening tool, not a diagnostic device.">
+<link rel="icon" href="assets/favicon.png">
+<link rel="stylesheet" href="assets/neural.css">
+<link rel="stylesheet" href="assets/landing.css">
+</head>
+<body class="landing">
+
+<a class="skip-link" href="#state-1">Skip to content</a>
+
+<div class="field" aria-hidden="true"></div>
+<canvas id="starfield" aria-hidden="true"></canvas>
+<canvas id="brain" aria-hidden="true"></canvas>
+
+<!-- The scan is decorative; this is what a screen reader gets instead. -->
+<p class="sr-only">
+  A three-dimensional particle rendering of a human brain rotates and zooms as
+  you scroll through seven sections describing how CogniDiff works. The
+  animation is decorative — all information is in the text below.
+</p>
+
+<!-- fixed HUD ---------------------------------------------------------- -->
+<a class="hud-close" href="pages/login.html" aria-label="Close the introduction and sign in">&#10005;</a>
+<a class="hud-mark" href="#state-1" aria-label="Back to the top">C</a>
+
+<nav class="topbar" aria-label="Primary">
+  <span class="topbar__brand">CogniDiff</span>
+  <span class="topbar__sep" aria-hidden="true"></span>
+  <span class="topbar__tag">NEURAL&nbsp;RHYTHM&nbsp;MONITOR</span>
+  <a class="btn btn--ghost topbar__cta" href="pages/login.html">Open dashboard</a>
+</nav>
+
+<ol class="steps" id="steps" aria-label="Section progress">
+  <li aria-current="step">01</li><li>02</li><li>03</li>
+  <li>04</li><li>05</li><li>06</li><li>07</li>
+</ol>
+
+<main id="scroll">
+
+  <!-- 01 ARRIVAL ------------------------------------------------------- -->
+  <section class="state state--left" id="state-1" data-state="1">
+    <div class="state__copy">
+      <p class="tag">ARRIVAL</p>
+      <h1 class="display">Eighty-six billion neurons, and one quiet keyboard.</h1>
+      <p class="lede">
+        Everything you think passes through a body that has to type it. CogniDiff
+        watches only the rhythm of that translation — never the words — and
+        learns what normal looks like for you.
+      </p>
+      <ul class="telemetry">
+        <li>SPECIMEN <b>HUMAN&nbsp;&middot;&nbsp;CEREBRUM</b></li>
+        <li>STATUS <b data-live="status">MAPPING</b></li>
+        <li>RATE <b data-live="rate">4.21 M/S</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 02 THE BASELINE -------------------------------------------------- -->
+  <section class="state state--right" id="state-2" data-state="2">
+    <div class="state__copy">
+      <p class="tag">THE&nbsp;BASELINE</p>
+      <h2 class="display">Your baseline is you, not an average.</h2>
+      <p class="lede">
+        A fast typist and a slow typist are both perfectly normal. CogniDiff never
+        compares you to a population — it builds a statistical picture of your own
+        typing across two weeks, hour by hour, and measures everything after that
+        against it.
+      </p>
+      <ul class="telemetry">
+        <li>REGION <b>FRONTAL&nbsp;CORTEX</b></li>
+        <li>DEPTH <b>2.0&nbsp;MM</b></li>
+        <li>WINDOW <b data-live="window">14 DAYS</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 03 SIGNALS — terminal card --------------------------------------- -->
+  <section class="state state--center" id="state-3" data-state="3">
+    <div class="state__copy state__copy--wide">
+      <p class="tag">SIGNALS</p>
+      <h2 class="display display--center">Everything you are, travelling as electricity.</h2>
+
+      <div class="terminal">
+        <div class="terminal__bar">
+          <span><span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>SIGNALS&nbsp;LOG</span>
+          <span class="terminal__live">LIVE</span>
+        </div>
+        <div class="terminal__body">
+          <p class="terminal__line">
+            Step inside the traffic. Each keystroke carries a timestamp, a hold
+            duration and a gap — chemical to electric and back, a hundred metres
+            a second, never still.
+          </p>
+          <dl class="terminal__rows">
+            <div><dt class="k">RATE</dt><dd class="v" data-live="rate">4.21 M/S</dd></div>
+            <div><dt class="k">CHANNEL</dt><dd class="v">AXONAL</dd></div>
+            <div><dt class="k">CAPTURED</dt><dd class="v">TIMING&nbsp;ONLY</dd></div>
+          </dl>
+        </div>
+        <p class="terminal__prompt">&gt;&nbsp;</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 THE NETWORK --------------------------------------------------- -->
+  <section class="state state--left" id="state-4" data-state="4">
+    <div class="state__copy">
+      <p class="tag">THE&nbsp;NETWORK</p>
+      <h2 class="display">Rhythm, not words.</h2>
+      <p class="lede">
+        The scan disperses into what CogniDiff actually keeps: a constellation of
+        timings. How long a key was held. The gap before the next one. How often
+        you delete and retype. Your text never leaves the browser, because it is
+        never read in the first place.
+      </p>
+      <ul class="telemetry">
+        <li>RAW&nbsp;TEXT <b class="tel--ok">NEVER&nbsp;STORED</b></li>
+        <li>KEY&nbsp;VALUES <b class="tel--ok">NEVER&nbsp;STORED</b></li>
+        <li>NODES <b data-live="nodes">8&nbsp;FEATURES</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 05 INSIGHT ------------------------------------------------------- -->
+  <section class="state state--right" id="state-5" data-state="5">
+    <div class="state__copy">
+      <p class="tag">INSIGHT</p>
+      <h2 class="display">A number is useless until it tells you why.</h2>
+      <p class="lede">
+        A score of 62 on its own invites either panic or dismissal. So every
+        CogniScore arrives with the three things that moved it — your pauses are
+        21% longer, your corrections are up 14% — in words you can check against
+        your own week.
+      </p>
+      <ul class="telemetry">
+        <li>REGION <b>OCCIPITAL&nbsp;LOBE</b></li>
+        <li>METHOD <b>SHAP&nbsp;&middot;&nbsp;ABLATION</b></li>
+        <li>OUTPUT <b data-live="output">TOP&nbsp;3&nbsp;CHANGES</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 06 BALANCE ------------------------------------------------------- -->
+  <section class="state state--center-low" id="state-6" data-state="6">
+    <div class="state__copy">
+      <p class="tag">BALANCE</p>
+      <h2 class="display">The quiet half that keeps you upright.</h2>
+      <p class="lede">
+        One bad night is not a signal. CogniDiff refuses to alarm on a single
+        session — it escalates only on patterns that persist across days, and a
+        low-confidence reading raises nothing at all.
+      </p>
+      <ul class="telemetry">
+        <li>REGION <b>CEREBELLUM</b></li>
+        <li>NEURONS <b>69.8&nbsp;B</b></li>
+        <li>FALSE&nbsp;POSITIVES <b data-live="fp">&lt;15%</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 07 SUMMARY ------------------------------------------------------- -->
+  <section class="state state--center" id="state-7" data-state="7">
+    <div class="state__copy state__copy--wide">
+      <p class="tag">SUMMARY</p>
+      <h2 class="display display--center">Detection of change. Never a diagnosis.</h2>
+      <p class="lede lede--center">
+        CogniDiff detects deviation from an individual's own typing baseline. It
+        does not detect, diagnose or confirm cognitive decline, and no clinical
+        sensitivity or specificity is claimed, because no clinically labelled
+        data was used.
+      </p>
+
+      <div class="cta">
+        <a class="btn btn--solid" href="pages/login.html">Open your dashboard</a>
+        <a class="btn btn--ghost" href="pages/login.html?role=doctor">Doctor portal</a>
+      </div>
+
+      <ul class="telemetry telemetry--center">
+        <li>SCAN <b>COMPLETE</b></li>
+        <li>MODE <b>SCREENING&nbsp;&middot;&nbsp;MONITORING</b></li>
+        <li>BUILD <b>v1.0</b></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="landing-foot">
+  <p>
+    CogniDiff is a monitoring and screening tool. It does not diagnose any medical
+    condition. Results should be interpreted by a qualified healthcare professional.
+  </p>
+</footer>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="assets/starfield.js"></script>
+<script src="assets/neural-brain.js"></script>
+<script src="assets/landing.js"></script>
+</body>
+</html>

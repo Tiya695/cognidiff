@@ -1,0 +1,389 @@
+/* ==========================================================================
+   CogniDiff design system
+   Deep navy field, drifting starfield, cyan neural accents, monospace HUD.
+   Shared by the landing page, the dashboard, the mini-tasks and the doctor
+   report so the whole product reads as one instrument.
+   ========================================================================== */
+
+:root {
+  /* --- field ------------------------------------------------------------ */
+  --bg-deep:    #04091c;
+  --bg-mid:     #071331;
+  --bg-high:    #0b2050;
+  --glow-blue:  #1a4fd0;
+  --glow-cyan:  #38bdf8;
+
+  /* --- surfaces --------------------------------------------------------- */
+  --panel:      rgba(12, 30, 68, .42);
+  --panel-solid:rgba(7, 17, 42, .92);
+  --line:       rgba(127, 216, 255, .14);
+  --line-hot:   rgba(127, 216, 255, .40);
+
+  /* --- ink -------------------------------------------------------------- */
+  --text:       #eaf4ff;
+  --text-dim:   #9db4d6;
+  --muted:      #7f95b8;
+  --faint:      #566d92;
+
+  /* --- accents ---------------------------------------------------------- */
+  --cyan:       #7fd8ff;
+  --cyan-hot:   #38bdf8;
+  --green:      #5ce6b5;
+  --yellow:     #ffd166;
+  --orange:     #ff9f5a;
+  --red:        #ff7a8a;
+  --violet:     #a78bfa;
+
+  /* --- type ------------------------------------------------------------- */
+  --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
+  --sans: "Segoe UI Variable Display", "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
+
+  --step: clamp(11px, .78vw, 13px);
+  --radius: 12px;
+  --maxw: 1240px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--sans);
+  font-size: 16px;                 /* health tool — never below 16px body */
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg-deep);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* The galaxy field. Two coloured glows over a vertical gradient, exactly the
+   deep-navy-with-a-blue-bloom look of the reference scan. */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(90% 65% at 82% 104%, rgba(26, 79, 208, .55), transparent 60%),
+    radial-gradient(70% 55% at 6% -6%,  rgba(56, 189, 248, .18), transparent 58%),
+    radial-gradient(120% 90% at 50% 40%, rgba(11, 32, 80, .55), transparent 70%),
+    linear-gradient(175deg, #061029 0%, var(--bg-deep) 60%, #030713 100%);
+}
+
+/* Starfield canvas sits above the gradient, below all content. */
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   accessibility primitives
+   ========================================================================== */
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; top: -100px; left: 12px; z-index: 999;
+  padding: 12px 18px; border-radius: 8px;
+  background: var(--cyan); color: #04091c;
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+
+:focus-visible {
+  outline: 2px solid var(--cyan-hot);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   HUD typography
+   ========================================================================== */
+
+.tag {
+  display: inline-flex; align-items: center; gap: .55em;
+  font-family: var(--mono);
+  font-size: var(--step);
+  font-weight: 500;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.tag::before { content: ">"; opacity: .55; letter-spacing: 0; }
+.tag::after {
+  content: "_";
+  opacity: .5;
+  animation: blink 1.15s steps(2, start) infinite;
+}
+@keyframes blink { 0%, 50% { opacity: .5 } 51%, 100% { opacity: 0 } }
+
+h1, h2, h3 { margin: 0; font-weight: 640; letter-spacing: -.022em; line-height: 1.08; }
+
+.display {
+  font-size: clamp(2.1rem, 5.2vw, 4.05rem);
+  max-width: 15ch;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 1.35rem 0 0;
+  max-width: 46ch;
+  font-size: clamp(.95rem, 1.15vw, 1.06rem);
+  line-height: 1.72;
+  color: var(--text-dim);
+}
+
+.hdr {
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: var(--step);
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.hdr b { color: var(--cyan); font-weight: 500; }
+
+/* telemetry row — the bottom metadata strip */
+.telemetry {
+  display: flex; flex-wrap: wrap; gap: 1.6rem 2.4rem;
+  margin: 2.4rem 0 0; padding: 0;
+  list-style: none;
+}
+.telemetry > li {
+  position: relative;
+  padding-left: 1rem;
+  font-family: var(--mono);
+  font-size: var(--step);
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.telemetry > li::before {
+  content: "\2022";
+  position: absolute; left: 0; top: 0;
+  color: var(--cyan); opacity: .65;
+}
+.telemetry b {
+  margin-left: .55em;
+  color: var(--cyan);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   panels + terminal cards
+   ========================================================================== */
+
+.panel {
+  padding: 1.5rem 1.65rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(9px);
+}
+
+.terminal {
+  max-width: 560px;
+  border: 1px solid var(--line-hot);
+  border-radius: var(--radius);
+  background: rgba(6, 14, 36, .74);
+  backdrop-filter: blur(11px);
+  box-shadow: 0 30px 90px -40px rgba(0, 0, 0, .9),
+              0 0 60px -30px rgba(56, 189, 248, .5);
+  overflow: hidden;
+}
+.terminal__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .78rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono); font-size: var(--step);
+  letter-spacing: .24em; text-transform: uppercase;
+  color: var(--muted);
+}
+.terminal__dots { display: inline-flex; gap: 5px; margin-right: .7rem; }
+.terminal__dots i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--faint);
+}
+.terminal__live {
+  display: inline-flex; align-items: center; gap: .5em;
+  color: var(--cyan);
+}
+.terminal__live::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 9px 1px var(--cyan);
+  animation: livepulse 1.9s ease-in-out infinite;
+}
+@keyframes livepulse { 0%, 100% { opacity: 1 } 50% { opacity: .28 } }
+
+.terminal__body { padding: 1.15rem 1.15rem .5rem; }
+.terminal__line {
+  position: relative;
+  padding-left: 1.35rem;
+  margin: 0 0 1rem;
+  font-size: .93rem; line-height: 1.68;
+  color: var(--text-dim);
+}
+.terminal__line::before {
+  content: ">";
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono); color: var(--cyan); opacity: .7;
+}
+.terminal__rows { margin: 0; padding: 0 0 .35rem; list-style: none; }
+.terminal__rows li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: .48rem 0;
+  border-top: 1px solid rgba(127, 216, 255, .08);
+  font-family: var(--mono); font-size: var(--step);
+  letter-spacing: .17em; text-transform: uppercase;
+}
+.terminal__rows dt, .terminal__rows .k { color: var(--faint); }
+.terminal__rows dd, .terminal__rows .v { margin: 0; color: var(--cyan); }
+.terminal__prompt {
+  padding: .7rem 1.15rem 1rem;
+  font-family: var(--mono); font-size: var(--step);
+  color: var(--muted);
+}
+.terminal__prompt::after {
+  content: "_";
+  animation: blink 1.15s steps(2, start) infinite;
+}
+
+/* ==========================================================================
+   chrome — fixed HUD furniture
+   ========================================================================== */
+
+.hud-close, .hud-mark {
+  position: fixed; z-index: 40;
+  display: grid; place-items: center;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(6, 14, 36, .8);
+  backdrop-filter: blur(8px);
+  color: var(--text-dim);
+  font-family: var(--mono); font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s, border-color .2s, background .2s, transform .2s;
+}
+.hud-close { top: 22px; right: 24px; }
+.hud-mark  { bottom: 22px; left: 24px; font-size: 13px; letter-spacing: .05em; }
+.hud-close:hover, .hud-mark:hover {
+  color: var(--cyan); border-color: var(--line-hot);
+  background: rgba(26, 79, 208, .3);
+}
+
+/* step indicator */
+.steps {
+  position: fixed; z-index: 40;
+  bottom: 26px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 1.15rem;
+  margin: 0; padding: 0; list-style: none;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .2em;
+}
+.steps li { position: relative; color: var(--faint); opacity: .5; transition: opacity .3s, color .3s; }
+.steps li::before {
+  content: ""; position: absolute;
+  top: -9px; left: 50%; transform: translateX(-50%) scaleX(0);
+  width: 17px; height: 1px;
+  background: var(--cyan);
+  transition: transform .35s ease;
+}
+.steps li[aria-current="step"] { color: var(--cyan); opacity: 1; }
+.steps li[aria-current="step"]::before { transform: translateX(-50%) scaleX(1); }
+
+/* ==========================================================================
+   buttons, badges, links
+   ========================================================================== */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+  padding: .82rem 1.5rem;
+  border: 1px solid var(--line-hot);
+  border-radius: 999px;
+  background: rgba(26, 79, 208, .22);
+  color: var(--text);
+  font-family: var(--mono); font-size: 12px;
+  letter-spacing: .18em; text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s, transform .12s;
+}
+.btn:hover {
+  background: rgba(56, 189, 248, .3);
+  border-color: var(--cyan);
+  color: #fff;
+}
+.btn:active { transform: translateY(1px); }
+.btn--ghost { background: transparent; border-color: var(--line); }
+.btn--ghost:hover { background: rgba(26, 79, 208, .22); }
+.btn--solid { background: var(--cyan); border-color: var(--cyan); color: #04091c; font-weight: 600; }
+.btn--solid:hover { background: #a8e6ff; border-color: #a8e6ff; color: #04091c; }
+.btn--danger { color: var(--red); border-color: rgba(255, 122, 138, .38); background: transparent; }
+.btn--danger:hover { background: rgba(255, 122, 138, .16); border-color: var(--red); color: #fff; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: .5em;
+  padding: .34rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.badge__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* Alert states always carry colour PLUS a text label PLUS an icon glyph.
+   A red circle alone is meaningless to a colourblind user and invisible to a
+   screen reader, so colour is never the only channel. */
+.badge--green  { color: var(--green);  border-color: rgba(92, 230, 181, .4); }
+.badge--yellow { color: var(--yellow); border-color: rgba(255, 209, 102, .4); }
+.badge--orange { color: var(--orange); border-color: rgba(255, 159, 90, .4); }
+.badge--red    { color: var(--red);    border-color: rgba(255, 122, 138, .45); }
+.badge--blue   { color: var(--cyan);   border-color: var(--line-hot); }
+.badge--grey   { color: var(--muted);  border-color: var(--line); }
+
+a { color: var(--cyan); }
+
+/* ==========================================================================
+   layout helpers
+   ========================================================================== */
+
+.shell { width: min(100% - 3rem, var(--maxw)); margin-inline: auto; }
+
+.grid { display: grid; gap: 1.15rem; }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid--3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.stack > * + * { margin-top: 1.15rem; }
+
+.scroll-x { overflow-x: auto; }
+
+@media (max-width: 640px) {
+  .shell { width: calc(100% - 1.6rem); }
+  .hud-close { top: 14px; right: 14px; width: 38px; height: 38px; }
+  .hud-mark { bottom: 68px; left: 14px; width: 38px; height: 38px; }
+  .telemetry { gap: .9rem 1.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

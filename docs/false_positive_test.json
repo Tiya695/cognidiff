@@ -1,0 +1,23 @@
+{
+  "seed": 42,
+  "weeks_simulated": 40,
+  "days_per_week": 7,
+  "sessions_per_day": 5,
+  "sessions_total": 1400,
+  "session_false_positive_rate_pct": 13.71,
+  "week_escalation_rate_pct": 0.0,
+  "week_escalation_counts": "SIGNIFICANT_DEVIATION or PERSISTENT_DEVIATION only",
+  "target_pct": 15.0,
+  "passes": true,
+  "mean_cogni_score": 94.29,
+  "min_cogni_score": 40.0,
+  "thresholds": {
+    "deviation_threshold_pct": 25.0,
+    "isolationforest_contamination": 0.08,
+    "dual_confirmation": "both models must agree before a flag is raised"
+  },
+  "bootstrap_95ci": [
+    12.0,
+    15.5
+  ]
+}

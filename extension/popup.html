@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CogniDiff</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header class="hd">
+    <div class="mark" aria-hidden="true">
+      <span class="ring"></span><span class="dot"></span>
+    </div>
+    <div class="ttl">
+      <h1>CogniDiff</h1>
+      <p class="tag">&gt; NEURAL&nbsp;RHYTHM&nbsp;MONITOR</p>
+    </div>
+    <span id="linkState" class="pill pill-off" title="Backend link status">OFFLINE</span>
+  </header>
+
+  <section class="panel">
+    <div class="row row-toggle">
+      <div>
+        <p class="lbl">Monitoring</p>
+        <p id="toggleState" class="val val-off">OFF</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggle" aria-describedby="privacy">
+        <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        <span class="sr">Enable keystroke rhythm monitoring</span>
+      </label>
+    </div>
+
+    <div class="bar" aria-hidden="true"></div>
+
+    <dl class="stats">
+      <div><dt>SESSIONS&nbsp;TODAY</dt><dd id="sToday">—</dd></div>
+      <div><dt>AVG&nbsp;WPM</dt><dd id="sWpm">—</dd></div>
+      <div><dt>AVG&nbsp;IKI</dt><dd id="sIki">—</dd></div>
+      <div><dt>QUEUED</dt><dd id="sQueue">—</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel notice" id="privacy">
+    <p class="hdr">&bull;&bull;&bull; PRIVACY NOTICE</p>
+    <p class="body">
+      We never store what you type. Only anonymous behavioural features are saved —
+      timing, rhythm and correction counts.
+    </p>
+    <ul class="checks">
+      <li>Capture is off on password, payment and login pages</li>
+      <li>Capture is off in incognito windows</li>
+      <li>Only allowlisted sites are monitored</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <p class="hdr">&bull;&bull;&bull; MONITORED SITES</p>
+    <ul id="allowlist" class="allow"></ul>
+    <form id="addForm" class="add">
+      <label class="sr" for="newSite">Add a site to the allowlist</label>
+      <input id="newSite" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
+      <button type="submit" class="btn btn-ghost">ADD</button>
+    </form>
+  </section>
+
+  <div class="actions">
+    <button id="viewData" class="btn">VIEW MY DATA</button>
+    <button id="openDash" class="btn">DASHBOARD</button>
+    <button id="deleteData" class="btn btn-danger">DELETE ALL MY DATA</button>
+  </div>
+
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <pre id="dump" class="dump" hidden></pre>
+
+  <footer class="ft">
+    <span>&bull; STATUS <b id="ftState">IDLE</b></span>
+    <span>&bull; BUILD <b>v1.0</b></span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
