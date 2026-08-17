@@ -33,8 +33,8 @@
          morph: 0, pulse: true, focus: null, lines: 0 },
 
     // 04 THE NETWORK, disperse into a constellation of nodes and links
-    4: { cam: [0, 0, 8.20], target: [0, 0, 0], spin: 0.012,
-         morph: 1, pulse: false, focus: null, lines: 0.42 },
+    4: { cam: [0, 0, 5.90], target: [0, 0, 0], spin: 0.012,
+         morph: 1, pulse: false, focus: null, lines: 0.34 },
 
     // 05 INSIGHT, regather, swing behind to the occipital pole
     5: { cam: [0.55, 0.18, 3.55], target: [0, 0.02, 0], spin: 0, rotY: Math.PI,

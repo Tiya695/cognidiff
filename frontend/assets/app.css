@@ -289,9 +289,73 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
    ========================================================================== */
 
 .task-stage {
-  min-height: 340px;
+  min-height: 380px;
   display: grid; place-items: center;
   padding: 2rem 1.5rem; text-align: center;
+}
+
+/* --- the brief shown before every task --------------------------------- */
+
+.brief { max-width: 46ch; margin-inline: auto; text-align: left; }
+.brief__step {
+  margin: 0 0 .5rem;
+  font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--cyan);
+}
+.brief__title { font-size: 1.5rem; margin-bottom: 1.1rem; }
+.brief__list { margin: 0; padding-left: 1.3rem; }
+.brief__list li {
+  margin-bottom: .55rem;
+  font-size: .96rem; line-height: 1.6; color: var(--text-dim);
+}
+.brief__list li::marker { color: var(--cyan); font-family: var(--mono); font-size: .85em; }
+.brief__scoring {
+  margin: 1.1rem 0 0; padding: .75rem .9rem;
+  border-left: 2px solid var(--line-hot);
+  background: rgba(26, 79, 208, .16);
+  border-radius: 0 8px 8px 0;
+  font-size: .9rem; color: var(--text);
+}
+.brief__done {
+  margin: 0; font-size: 2.6rem; line-height: 1;
+  color: var(--green);
+  text-shadow: 0 0 26px rgba(92, 230, 181, .55);
+}
+
+/* --- in-task feedback --------------------------------------------------- */
+
+.task-cue {
+  margin: 0 0 1.4rem;
+  font-size: 1.05rem; color: var(--text-dim);
+  min-height: 1.6em;
+  transition: color .18s;
+}
+.task-cue--go { color: var(--cyan); font-weight: 600; }
+
+.task-count {
+  margin: 1.4rem 0 0;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: .2em; color: var(--faint);
+  min-height: 1.4em;
+}
+.task-last {
+  margin: .4rem 0 0;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--cyan); min-height: 1.4em;
+}
+
+.task-timer {
+  width: min(100%, 320px); height: 3px;
+  margin: 1.8rem auto 0;
+  border-radius: 2px;
+  background: rgba(127, 216, 255, .12);
+  overflow: hidden;
+}
+.task-timer i {
+  display: block; height: 100%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px rgba(127, 216, 255, .7);
+  transition: width 1s linear;
 }
 .task-word {
   font-size: clamp(1.6rem, 5vw, 2.6rem); font-weight: 640;
@@ -321,6 +385,10 @@ table.data .num { font-family: var(--mono); font-variant-numeric: tabular-nums; 
   box-shadow: 0 0 30px rgba(127, 216, 255, .8);
 }
 .pattern-cell--tap { transform: scale(.94); border-color: var(--line-hot); }
+/* Cells are disabled while the sequence is playing, so it is obvious that this
+   is the watch phase and not the answer phase. */
+.pattern-cell[disabled] { cursor: default; opacity: .55; }
+.pattern-cell:not([disabled]):hover { border-color: var(--line-hot); background: rgba(26, 79, 208, .34); }
 .task-progress {
   display: flex; gap: .5rem; justify-content: center; margin-bottom: 1.5rem;
   list-style: none; padding: 0;

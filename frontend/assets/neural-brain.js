@@ -156,10 +156,10 @@
       // Constellation target: a wide, sparse shell with clustered nodes, so
       // the dispersed state reads as a star map rather than a cloud of dust.
       const d = randomDirection(rand);
-      const spread = 2.6 + Math.pow(rand(), 0.55) * 4.2;
-      scatter[i * 3]     = d[0] * spread * 1.55;
-      scatter[i * 3 + 1] = d[1] * spread * 0.95;
-      scatter[i * 3 + 2] = d[2] * spread * 1.15;
+      const spread = 1.9 + Math.pow(rand(), 0.7) * 2.3;
+      scatter[i * 3]     = d[0] * spread * 1.35;
+      scatter[i * 3 + 1] = d[1] * spread * 0.85;
+      scatter[i * 3 + 2] = d[2] * spread * 1.00;
       i++;
     };
 
@@ -293,6 +293,9 @@
     uniform float uPulse;        // -1 = off, else 0..1 sweep position
     uniform vec3  uFocus;        // highlighted region centre
     uniform float uFocusRadius;  // 0 = no highlight
+    uniform vec2  uCursor;       // pointer in clip space
+    uniform float uCursorOn;     // 0 = pointer has left the window
+    uniform vec2  uAspect;
     uniform float uPixelRatio;
     uniform float uScale;
 
@@ -329,13 +332,23 @@
         heat = max(heat, smoothstep(uFocusRadius, uFocusRadius * 0.55, d) * 0.7 * (1.0 - m));
       }
 
-      vHeat = heat;
-      vAlpha = aAlpha * mix(1.0, 0.85, m) + heat * 0.07;
-
       vec4 mv = modelViewMatrix * vec4(p, 1.0);
       gl_Position = projectionMatrix * mv;
 
-      float s = aSize * uScale * (1.0 + heat * 0.75);
+      // The cursor is a light source: particles near it, in screen space, lift.
+      // Screen space rather than world space on purpose, so the light behaves
+      // like something held in front of the scan rather than buried inside it.
+      float lit = 0.0;
+      if (uCursorOn > 0.5 && gl_Position.w > 0.0) {
+        vec2 ndc = gl_Position.xy / gl_Position.w;
+        float d = length((ndc - uCursor) * uAspect);
+        lit = smoothstep(0.55, 0.0, d);
+      }
+
+      vHeat = max(heat, lit * 0.45);
+      vAlpha = aAlpha * mix(1.0, 1.30, m) + heat * 0.07 + lit * 0.10;
+
+      float s = aSize * uScale * (1.0 + heat * 0.75 + lit * 0.30);
       gl_PointSize = s * uPixelRatio * (34.0 / max(-mv.z, 0.1));
     }
   `;
@@ -412,6 +425,9 @@
         uPulse:       { value: -1 },
         uFocus:       { value: new T.Vector3(0, 0, 0) },
         uFocusRadius: { value: 0 },
+        uCursor:      { value: new T.Vector2(0, 0) },
+        uCursorOn:    { value: 0 },
+        uAspect:      { value: new T.Vector2(1, 1) },
         uPixelRatio:  { value: dpr },
         uScale:       { value: wide ? 1.0 : 0.85 },
         uColor:       { value: new T.Color(options.color || '#5ec8f5') },
@@ -478,6 +494,7 @@
       this.camera.aspect = w / Math.max(h, 1);
       this.camera.updateProjectionMatrix();
       this.uniforms.uScale.value = w > 900 ? 1.0 : 0.85;
+      this.uniforms.uAspect.value.set(Math.max(w / h, 1), Math.max(h / w, 1));
     }
 
     start() {
@@ -534,6 +551,18 @@
     get camX() { return this._camX ?? 0; }  set camX(v) { this._camX = v; }
     get camY() { return this._camY ?? 0; }  set camY(v) { this._camY = v; }
     get camZ() { return this._camZ ?? 4.2; } set camZ(v) { this._camZ = v; }
+
+    /** Pointer position in CSS pixels, or null when it has left the window. */
+    setCursor(pos) {
+      if (!pos) { this.uniforms.uCursorOn.value = 0; return; }
+      const rect = this.canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) { this.uniforms.uCursorOn.value = 0; return; }
+      this.uniforms.uCursor.value.set(
+        ((pos[0] - rect.left) / rect.width) * 2 - 1,
+        -(((pos[1] - rect.top) / rect.height) * 2 - 1)
+      );
+      this.uniforms.uCursorOn.value = 1;
+    }
 
     setFocus(x, y, z, radius) {
       this.uniforms.uFocus.value.set(x, y, z);

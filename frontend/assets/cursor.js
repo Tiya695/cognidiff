@@ -1,14 +1,17 @@
-/* CogniDiff cursor.
+/* CogniDiff cursor: a light source, not a shape.
  *
- * A soft cyan bloom and a thin ring that trail the pointer, easing toward it
- * rather than snapping. The ring lags slightly behind the bloom, which is what
- * reads as weight instead of as a sticker glued to the cursor.
+ * Two stacked radial washes follow the pointer at different rates, so the light
+ * has a bright heart that keeps up and a broad halo that lags. Nothing is
+ * outlined. The earlier version drew a ring, which reads as a widget glued to
+ * the screen rather than as illumination.
  *
- * The native cursor stays visible. Hiding it in favour of a custom dot is a
- * common flourish and a bad idea here: it breaks text selection affordances and
- * makes the page feel broken to anyone whose pointer needs to be findable.
+ * On the landing page the same position is handed to the particle shader, so
+ * the scan itself brightens where the light falls. That is the part that sells
+ * it: the light appears to fall *on* the brain rather than float in front of it.
  *
- * Disabled entirely on touch devices and under prefers-reduced-motion.
+ * The native cursor stays visible. Hiding it is a common flourish and a bad
+ * idea: it breaks text-selection affordances and makes the page feel broken to
+ * anyone whose pointer needs to be findable.
  */
 
 (function (global) {
@@ -19,55 +22,59 @@
     const coarse = global.matchMedia('(pointer: coarse)').matches;
     if (reduce || coarse) return null;
 
-    const glow = document.createElement('div');
-    glow.className = 'cursor-glow';
-    glow.setAttribute('aria-hidden', 'true');
+    const beam = document.createElement('div');
+    beam.className = 'cursor-beam';
+    beam.setAttribute('aria-hidden', 'true');
 
-    const ring = document.createElement('div');
-    ring.className = 'cursor-ring';
-    ring.setAttribute('aria-hidden', 'true');
+    const core = document.createElement('div');
+    core.className = 'cursor-core';
+    core.setAttribute('aria-hidden', 'true');
 
-    document.body.appendChild(glow);
-    document.body.appendChild(ring);
+    document.body.appendChild(beam);
+    document.body.appendChild(core);
 
     let tx = global.innerWidth / 2, ty = global.innerHeight / 2;
-    let gx = tx, gy = ty, rx = tx, ry = ty;
-    let visible = false;
-    let raf = null;
+    let bx = tx, by = ty, cx = tx, cy = ty;
+    let visible = false, raf = null;
 
     function onMove(e) {
-      tx = e.clientX;
-      ty = e.clientY;
+      tx = e.clientX; ty = e.clientY;
       if (!visible) {
         visible = true;
-        gx = rx = tx; gy = ry = ty;
-        glow.classList.add('is-on');
-        ring.classList.add('is-on');
+        bx = cx = tx; by = cy = ty;
+        beam.classList.add('is-on');
+        core.classList.add('is-on');
       }
     }
 
-    // Grow the ring over anything clickable, so the cursor doubles as an
-    // affordance rather than pure decoration.
+    const INTERACTIVE =
+      'a, button, input, select, textarea, label, [role="button"], [tabindex]:not([tabindex="-1"])';
+
     function onOver(e) {
-      const hit = e.target.closest?.(
-        'a, button, input, select, textarea, label, [role="button"], [tabindex]:not([tabindex="-1"])'
-      );
-      ring.classList.toggle('is-hot', Boolean(hit));
+      const hot = Boolean(e.target.closest?.(INTERACTIVE));
+      beam.classList.toggle('is-hot', hot);
+      core.classList.toggle('is-hot', hot);
     }
 
     function onLeave() {
       visible = false;
-      glow.classList.remove('is-on');
-      ring.classList.remove('is-on');
+      beam.classList.remove('is-on');
+      core.classList.remove('is-on');
+      if (global.CogniDiffScan) global.CogniDiffScan.setCursor(null);
     }
 
     function frame() {
-      // Two different easing rates are what create the lag between the two.
-      gx += (tx - gx) * 0.18;  gy += (ty - gy) * 0.18;
-      rx += (tx - rx) * 0.085; ry += (ty - ry) * 0.085;
+      cx += (tx - cx) * 0.22;  cy += (ty - cy) * 0.22;   // heart keeps up
+      bx += (tx - bx) * 0.075; by += (ty - by) * 0.075;  // halo lags
 
-      glow.style.transform = `translate3d(${gx}px, ${gy}px, 0) translate(-50%, -50%)`;
-      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
+      core.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+      beam.style.transform = `translate3d(${bx}px, ${by}px, 0) translate(-50%, -50%)`;
+
+      // Hand the light to the scan so the particles react to it.
+      const scan = global.CogniDiffScan;
+      if (scan && scan.setCursor) {
+        scan.setCursor(visible ? [cx, cy] : null);
+      }
 
       raf = requestAnimationFrame(frame);
     }
@@ -85,8 +92,8 @@
         global.removeEventListener('pointermove', onMove);
         global.removeEventListener('pointerover', onOver);
         document.removeEventListener('mouseleave', onLeave);
-        glow.remove();
-        ring.remove();
+        beam.remove();
+        core.remove();
       },
     };
   }

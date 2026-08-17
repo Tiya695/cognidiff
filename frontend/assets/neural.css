@@ -14,20 +14,24 @@
    ========================================================================== */
 
 @font-face {
-  font-family: "Poppins"; font-style: normal; font-weight: 400;
-  font-display: swap; src: url("../vendor/fonts/Poppins-400.woff2") format("woff2");
+  font-family: "Inter"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("../vendor/fonts/Inter-400.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Poppins"; font-style: normal; font-weight: 500;
-  font-display: swap; src: url("../vendor/fonts/Poppins-500.woff2") format("woff2");
+  font-family: "Inter"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("../vendor/fonts/Inter-500.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Poppins"; font-style: normal; font-weight: 600;
-  font-display: swap; src: url("../vendor/fonts/Poppins-600.woff2") format("woff2");
+  font-family: "Inter"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("../vendor/fonts/Inter-600.woff2") format("woff2");
 }
 @font-face {
-  font-family: "Poppins"; font-style: normal; font-weight: 700;
-  font-display: swap; src: url("../vendor/fonts/Poppins-700.woff2") format("woff2");
+  font-family: "Inter"; font-style: normal; font-weight: 700;
+  font-display: swap; src: url("../vendor/fonts/Inter-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 800;
+  font-display: swap; src: url("../vendor/fonts/Inter-800.woff2") format("woff2");
 }
 @font-face {
   font-family: "JetBrains Mono"; font-style: normal; font-weight: 400;
@@ -74,7 +78,7 @@
 
   /* --- type ------------------------------------------------------------- */
   --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, ui-monospace, monospace;
-  --sans: "Poppins", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --sans: "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   --step: clamp(11px, .78vw, 13px);
   --radius: 12px;
@@ -112,9 +116,14 @@ body {
 }
 
 /* Starfield canvas sits above the gradient, below all content. */
+/* A canvas is a replaced element: `inset: 0` alone does NOT stretch it, because
+   `width: auto` resolves to its intrinsic 300x150. Without these two lines the
+   whole starfield renders in a small box in the top-left corner. */
 #starfield {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: -1;
   pointer-events: none;
 }
@@ -123,45 +132,72 @@ body {
    cursor
    ========================================================================== */
 
-.cursor-glow, .cursor-ring {
+/* Light, not a ring. The first version drew an outlined circle chasing the
+   pointer, which reads as a widget stuck to the screen. What the reference does
+   is carry a soft source of light: nothing is outlined, the area around the
+   pointer is simply brighter, and the brightness lifts over anything you can
+   act on. */
+
+.cursor-beam, .cursor-core {
   position: fixed;
   top: 0; left: 0;
   z-index: 60;
   pointer-events: none;
   opacity: 0;
-  transition: opacity .35s ease, width .25s ease, height .25s ease,
-              border-color .25s ease;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transition: opacity .4s ease, width .38s cubic-bezier(.22,.8,.3,1),
+              height .38s cubic-bezier(.22,.8,.3,1);
   will-change: transform;
 }
-.cursor-glow.is-on, .cursor-ring.is-on { opacity: 1; }
+.cursor-beam.is-on { opacity: 1; }
+.cursor-core.is-on { opacity: 1; }
 
-.cursor-glow {
-  width: 260px; height: 260px;
-  border-radius: 50%;
+/* the broad wash */
+.cursor-beam {
+  width: 460px; height: 460px;
   background: radial-gradient(circle,
-    rgba(96, 190, 255, .17) 0%,
-    rgba(56, 189, 248, .09) 34%,
-    rgba(26, 79, 208, .04) 58%,
-    transparent 72%);
-  mix-blend-mode: screen;
+    rgba(120, 205, 255, .13) 0%,
+    rgba(70, 165, 245, .075) 26%,
+    rgba(40, 110, 220, .035) 48%,
+    rgba(26, 79, 208, .012) 66%,
+    transparent 78%);
+  filter: blur(6px);
+}
+.cursor-beam.is-hot {
+  width: 560px; height: 560px;
+  background: radial-gradient(circle,
+    rgba(150, 225, 255, .21) 0%,
+    rgba(80, 180, 250, .12) 26%,
+    rgba(40, 110, 220, .05) 48%,
+    transparent 78%);
 }
 
-.cursor-ring {
-  width: 26px; height: 26px;
-  border: 1px solid rgba(127, 216, 255, .55);
-  border-radius: 50%;
-  box-shadow: 0 0 12px -2px rgba(127, 216, 255, .5),
-              inset 0 0 8px -4px rgba(127, 216, 255, .6);
+/* the small bright heart of it, so the light has a source */
+.cursor-core {
+  width: 90px; height: 90px;
+  background: radial-gradient(circle,
+    rgba(210, 245, 255, .30) 0%,
+    rgba(140, 215, 255, .16) 30%,
+    transparent 68%);
+  filter: blur(3px);
 }
-.cursor-ring.is-hot {
-  width: 46px; height: 46px;
-  border-color: rgba(168, 230, 255, .9);
-  box-shadow: 0 0 22px -2px rgba(127, 216, 255, .75),
-              inset 0 0 12px -4px rgba(127, 216, 255, .8);
+.cursor-core.is-hot {
+  width: 130px; height: 130px;
+  background: radial-gradient(circle,
+    rgba(235, 252, 255, .46) 0%,
+    rgba(160, 225, 255, .24) 32%,
+    transparent 70%);
 }
 
 @media (pointer: coarse) {
-  .cursor-glow, .cursor-ring { display: none; }
+  .cursor-beam, .cursor-core { display: none; }
+}
+
+/* Never print the cursor. It was landing in saved PDFs as a stray blob over
+   the report content. */
+@media print {
+  .cursor-beam, .cursor-core { display: none !important; }
 }
 
 /* ==========================================================================
@@ -217,7 +253,11 @@ body {
 
 /* Poppins runs wide and light for its weight, so headings take 700 and tighter
    tracking to sit like the reference. */
-h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.028em; line-height: 1.06; }
+h1, h2, h3 {
+  margin: 0; font-weight: 700;
+  letter-spacing: -.033em; line-height: 1.05;
+  font-feature-settings: "cv05" 1, "cv08" 1;   /* single-storey g, as the reference uses */
+}
 
 .display {
   font-size: clamp(2.05rem, 5vw, 3.85rem);
