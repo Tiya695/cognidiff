@@ -147,6 +147,34 @@ def _startup() -> None:
 # health
 # ---------------------------------------------------------------------------
 
+@app.get("/", tags=["system"])
+def root():
+    """Signpost, not a page.
+
+    Opening the API's host in a browser is a natural thing to try, and a bare
+    404 does not tell you that you wanted a different port. This says so.
+
+    Deliberately left in the OpenAPI schema. Hiding it would keep the docs
+    tidier, but Attack 10 sweeps every endpoint *from the live schema* so that
+    a newly added route is covered the moment it exists — and a route the sweep
+    cannot see is precisely the route nobody checks. It is listed as public
+    instead, alongside /api/health.
+    """
+    return {
+        "service": "CogniDiff API",
+        "status": "running",
+        "note": "This is the backend. The web app runs on http://localhost:3000",
+        "endpoints": {
+            "health": "/api/health",
+            "interactive_docs": None if IS_PRODUCTION else "/docs",
+        },
+        "disclaimer": (
+            "CogniDiff detects deviation from an individual's own typing "
+            "baseline. It does not detect, diagnose or confirm cognitive decline."
+        ),
+    }
+
+
 @app.get("/api/health", tags=["system"])
 def health():
     return {

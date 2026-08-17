@@ -367,7 +367,9 @@ def test_attack_09d_errors_never_leak_internals(client, user):
 # Attack 10 — unauthenticated sweep of every endpoint
 # ---------------------------------------------------------------------------
 
-PUBLIC = {"/api/health", "/api/auth/login", "/api/auth/register",
+#: Intentionally reachable without a token. Every one of these is separately
+#: checked by test_attack_10b to confirm it leaks nothing sensitive.
+PUBLIC = {"/", "/api/health", "/api/auth/login", "/api/auth/register",
           "/api/federated/status"}
 
 
@@ -391,11 +393,14 @@ def test_attack_10_every_endpoint_requires_authentication(client):
     assert holes == [], f"endpoints reachable without a token: {holes}"
 
 
-def test_attack_10b_the_public_endpoints_leak_nothing_sensitive(client, user):
-    body = client.get("/api/health").json()
-    blob = json.dumps(body).lower()
-    for leak in ("password", "secret", "token", "alice", "user_id"):
-        assert leak not in blob
+@pytest.mark.parametrize("path", ["/", "/api/health", "/api/federated/status"])
+def test_attack_10b_the_public_endpoints_leak_nothing_sensitive(client, user, path):
+    res = client.get(path)
+    assert res.status_code == 200
+    blob = json.dumps(res.json()).lower()
+    for leak in ("password", "secret", "token", "alice", "user_id",
+                 "c:\\", "/home/", "site-packages"):
+        assert leak not in blob, f"{path} leaks {leak!r}"
 
 
 # ---------------------------------------------------------------------------
