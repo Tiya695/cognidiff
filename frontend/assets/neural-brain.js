@@ -74,7 +74,7 @@
    * ridges makes the surface look like the convoluted thing it is.
    */
   function cerebrumSurface(x, y, z, noise) {
-    const RX = 0.87, RY = 0.96, RZ = 1.14;
+    const RX = 0.87, RY = 0.94, RZ = 1.18;
 
     // base ellipsoid
     let r = 1 / Math.sqrt((x / RX) ** 2 + (y / RY) ** 2 + (z / RZ) ** 2);
@@ -104,8 +104,12 @@
     r *= 1 - 0.050 * lateral;
 
     // gyri: two octaves, coarse enough to read as folds rather than grain
-    const n1 = noise(x * 4.3 + 11, y * 4.3 + 23, z * 4.3 + 37);
-    const n2 = noise(x * 9.1 + 3,  y * 9.1 + 61, z * 9.1 + 17);
+    // Anisotropic on purpose: gyri are elongated winding ridges running
+    // roughly front-to-back, so the noise is sampled at a lower frequency
+    // along Z. Isotropic noise gives round speckles, which is exactly the
+    // difference between "textured sphere" and "brain" once it rotates.
+    const n1 = noise(x * 6.0 + 11, y * 6.0 + 23, z * 2.6 + 37);
+    const n2 = noise(x * 12.0 + 3, y * 12.0 + 61, z * 5.0 + 17);
     r *= 1 + 0.085 * (n1 - 0.5) + 0.038 * (n2 - 0.5);
 
     // ridged noise: peaks along the crests, which is where the bright
@@ -134,12 +138,15 @@
     const rand = mulberry32(seed);
     const noise = makeNoise3(mulberry32(seed ^ 0x9e3779b9));
 
-    // Weighted toward the surface: the shell is what carries the shape, and a
-    // dense interior just fills the silhouette in and hides the folds.
-    const nSurface = Math.floor(count * 0.70);
-    const nInterior = Math.floor(count * 0.08);
-    const nCerebellum = Math.floor(count * 0.13);
-    const nStem = count - nSurface - nInterior - nCerebellum;
+    // A FILLED VOLUME, not a shell. This is the single biggest thing the
+    // earlier version got wrong: it packed points onto the surface and left the
+    // middle empty, so the silhouette read as a hollow ring with a dark hole.
+    // The reference is a solid body of light, dense with individual bright
+    // points right across the projection, brighter at the rim only because you
+    // are looking through more of it edge-on.
+    const nBody = Math.floor(count * 0.78);
+    const nCerebellum = Math.floor(count * 0.14);
+    const nStem = count - nBody - nCerebellum;
 
     const pos = new Float32Array(count * 3);
     const scatter = new Float32Array(count * 3);
@@ -147,11 +154,13 @@
     const alpha = new Float32Array(count);
     const region = new Float32Array(count);
     const seedAttr = new Float32Array(count);
+    const normal = new Float32Array(count * 3);
 
     let i = 0;
-    const push = (x, y, z, s, a, reg) => {
+    const push = (x, y, z, s, a, reg, nx = 0, ny = 0, nz = 0) => {
       pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
       size[i] = s; alpha[i] = a; region[i] = reg; seedAttr[i] = rand();
+      normal[i * 3] = nx; normal[i * 3 + 1] = ny; normal[i * 3 + 2] = nz;
 
       // Constellation target: a wide, sparse shell with clustered nodes, so
       // the dispersed state reads as a star map rather than a cloud of dust.
@@ -163,66 +172,61 @@
       i++;
     };
 
-    // --- cerebral surface ---------------------------------------------
-    // Points are rejection-sampled toward the gyral crowns rather than spread
-    // evenly. Brightness alone was not enough, an evenly scattered shell reads
-    // as grain no matter how it is shaded, whereas biasing the *placement*
-    // makes the particles themselves trace the folds, which is what gives a
-    // real point-cloud scan its filamentary look.
-    let placed = 0, guard = 0;
-    while (placed < nSurface && guard < nSurface * 40) {
-      guard++;
+    // --- cerebral body, filled ------------------------------------------
+    // Radius is sampled as u^(1/3) so points land uniformly through the
+    // VOLUME rather than bunching at the centre, then pulled toward the shell
+    // so the cortex stays the densest part. Both matter: uniform-in-volume
+    // alone looks like a fog ball, shell-only leaves a hole.
+    for (let k = 0; k < nBody; k++) {
       const [dx, dy, dz] = randomDirection(rand);
       const { r, fold, groove } = cerebrumSurface(dx, dy, dz, noise);
 
-      if (rand() > 0.16 + 0.84 * fold) continue;      // reject sulcal floors
+      const uniform = Math.cbrt(rand());
+      // bias: most points sit in the outer third, a real minority deeper in
+      const q = Math.min(1, 0.30 + uniform * (0.55 + 0.30 * Math.pow(rand(), 0.5)));
+      const depth = 1 - q;                 // 0 at the shell, 1 at the centre
 
-      const jitter = 1 - rand() * 0.030;
-      const brightness = (0.28 + 0.90 * fold) * (1 - 0.50 * groove);
-      push(
-        dx * r * jitter,
-        dy * r * jitter + 0.06,
-        dz * r * jitter,
-        0.32 + rand() * 0.38 + fold * 0.30,
-        Math.min(0.58, 0.045 + rand() * 0.105 + brightness * 0.30),
-        0
-      );
-      placed++;
-    }
+      // Cortex is the bright band; deeper tissue is dimmer but never dark,
+      // which is what keeps the middle of the silhouette alive.
+      const shellBand = Math.exp(-Math.pow(depth / 0.16, 2));
+      const gyral = (0.30 + 0.85 * fold) * (1 - 0.45 * groove);
 
-    // --- interior volume (depth cue) -----------------------------------
-    // Sparse and dim on purpose: enough to suggest volume behind the shell,
-    // never enough to fill the silhouette in.
-    for (let k = 0; k < nInterior; k++) {
-      const [dx, dy, dz] = randomDirection(rand);
-      const { r } = cerebrumSurface(dx, dy, dz, noise);
-      const depth = 0.30 + rand() * 0.58;
+      const bright = 0.14 + 0.66 * shellBand * gyral + 0.10 * gyral * (1.0 - depth);
+      const sparkle = Math.pow(rand(), 7) * 0.55;   // the scattered bright stars
+
       push(
-        dx * r * depth, dy * r * depth + 0.06, dz * r * depth,
-        0.24 + rand() * 0.22,
-        0.020 + rand() * 0.048,
-        1
+        dx * r * q,
+        dy * r * q + 0.06,
+        dz * r * q,
+        0.26 + rand() * 0.30 + fold * 0.22 + sparkle * 0.5,
+        Math.min(0.90, 0.045 + rand() * 0.085 + bright * 0.55 + sparkle * 0.75),
+        q > 0.86 ? 0 : 1,
+        dx, dy, dz
       );
     }
 
     // --- cerebellum ------------------------------------------------------
     // Two lobes below and behind the cerebrum, with its characteristic fine
     // horizontal foliation.
-    const CB = { x: 0, y: -0.60, z: -0.74 };
+    const CB = { x: 0, y: -0.56, z: -0.84 };
     for (let k = 0; k < nCerebellum; k++) {
       const [dx, dy, dz] = randomDirection(rand);
       let r = 1 / Math.sqrt((dx / 0.60) ** 2 + (dy / 0.30) ** 2 + (dz / 0.40) ** 2);
       r *= 1 + 0.05 * (noise(dx * 9 + 5, dy * 34 + 9, dz * 9 + 2) - 0.5); // foliation
       const midline = Math.exp(-(dx * dx) / 0.004);
       r *= 1 - 0.13 * midline;
-      const shell = 1 - rand() * 0.30;
+      const q = Math.min(1, Math.cbrt(rand()) * (0.66 + 0.38 * rand()));
+      const depth = 1 - q;
+      const band = Math.exp(-Math.pow(depth / 0.22, 2));
+      const sparkle = Math.pow(rand(), 7) * 0.5;
       push(
-        CB.x + dx * r * shell,
-        CB.y + dy * r * shell,
-        CB.z + dz * r * shell,
-        0.34 + rand() * 0.40,
-        0.075 + rand() * 0.235,
-        2
+        CB.x + dx * r * q,
+        CB.y + dy * r * q,
+        CB.z + dz * r * q,
+        0.26 + rand() * 0.30 + sparkle * 0.5,
+        Math.min(0.92, 0.090 + rand() * 0.150 + band * 0.52 + sparkle * 0.70),
+        2,
+        dx, dy, dz
       );
     }
 
@@ -230,19 +234,21 @@
     for (let k = 0; k < nStem; k++) {
       const t = rand();                        // 0 top → 1 bottom
       // shell-weighted so the column has edges instead of fading to fog
-      const rad = (0.185 - 0.055 * t) * (0.80 + rand() * 0.20);
+      const maxR = 0.185 - 0.055 * t;
+      const rad = maxR * Math.sqrt(rand());     // uniform across the disc
       const ang = rand() * Math.PI * 2;
+      const sparkle = Math.pow(rand(), 7) * 0.5;
       push(
         Math.cos(ang) * rad,
         -0.46 - t * 0.62,
         -0.20 + Math.sin(ang) * rad * 0.85,
-        0.32 + rand() * 0.30,
-        0.070 + rand() * 0.190,
+        0.24 + rand() * 0.26 + sparkle * 0.5,
+        Math.min(0.88, 0.110 + rand() * 0.220 + sparkle * 0.60),
         3
       );
     }
 
-    return { pos, scatter, size, alpha, region, seed: seedAttr, count };
+    return { pos, scatter, size, alpha, region, seed: seedAttr, normal, count };
   }
 
   /** Pick node pairs for the constellation lines drawn in the network state. */
@@ -283,6 +289,7 @@
 
   const VERTEX = `
     attribute vec3  aScatter;
+    attribute vec3  aNormal;
     attribute float aSize;
     attribute float aAlpha;
     attribute float aRegion;
@@ -346,7 +353,17 @@
       }
 
       vHeat = max(heat, lit * 0.45);
-      vAlpha = aAlpha * mix(1.0, 1.30, m) + heat * 0.07 + lit * 0.10;
+      // Only a gentle edge lift. Additive blending already brightens the
+      // silhouette on its own, because edge-on the eye looks through more of
+      // the volume; shading it a second time carved a hole in the middle.
+      float rim = 1.0;
+      if (dot(aNormal, aNormal) > 0.25) {
+        vec3 nrm = normalize(normalMatrix * aNormal);
+        rim = 0.92 + 0.30 * pow(1.0 - abs(nrm.z), 2.0);
+      }
+      rim = mix(rim, 1.0, m);
+
+      vAlpha = aAlpha * rim * mix(1.0, 1.20, m) + heat * 0.07 + lit * 0.10;
 
       float s = aSize * uScale * (1.0 + heat * 0.75 + lit * 0.30);
       gl_PointSize = s * uPixelRatio * (34.0 / max(-mv.z, 0.1));
@@ -370,7 +387,7 @@
       if (d > 0.25) discard;
 
       float falloff = 1.0 - smoothstep(0.0, 0.25, d);
-      falloff = pow(falloff, 2.3);
+      falloff = pow(falloff, 1.7);
 
       vec3 col = mix(uColor, uHotColor, vHeat);
       gl_FragColor = vec4(col, falloff * vAlpha * uOpacity);
@@ -392,8 +409,8 @@
       this.reduceMotion = global.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const dpr = Math.min(global.devicePixelRatio || 1, 2);
-      const wide = global.innerWidth > 900;
-      this.count = options.count || (wide ? 90000 : 34000);
+      const wide = Math.max(canvas.clientWidth || 0, global.innerWidth) > 900;
+      this.count = options.count || (wide ? 140000 : 42000);
 
       // --- scene ---------------------------------------------------------
       this.scene = new T.Scene();
@@ -418,6 +435,7 @@
       geo.setAttribute('aAlpha', new T.BufferAttribute(data.alpha, 1));
       geo.setAttribute('aRegion', new T.BufferAttribute(data.region, 1));
       geo.setAttribute('aSeed', new T.BufferAttribute(data.seed, 1));
+      geo.setAttribute('aNormal', new T.BufferAttribute(data.normal, 3));
 
       this.uniforms = {
         uTime:        { value: 0 },
@@ -430,8 +448,8 @@
         uAspect:      { value: new T.Vector2(1, 1) },
         uPixelRatio:  { value: dpr },
         uScale:       { value: wide ? 1.0 : 0.85 },
-        uColor:       { value: new T.Color(options.color || '#5ec8f5') },
-        uHotColor:    { value: new T.Color(options.hotColor || '#a9e8ff') },
+        uColor:       { value: new T.Color(options.color || '#3f7ad6') },
+        uHotColor:    { value: new T.Color(options.hotColor || '#cfe9ff') },
         uOpacity:     { value: 1 },
       };
 

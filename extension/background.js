@@ -85,6 +85,10 @@ async function enqueue(batch) {
 }
 
 /** Retry anything the backend missed while it was down. */
+//: Reasons worth retrying later. Everything else is a 4xx that rejected the
+//: batch on its merits, where retrying cannot help.
+const RETRYABLE = new Set(['offline', 'http_429', 'not_signed_in', 'token_expired']);
+
 async function drainQueue() {
   const queue = await get('pending_queue', []);
   if (queue.length === 0) return { sent: 0, remaining: 0 };
@@ -94,7 +98,7 @@ async function drainQueue() {
   for (const batch of queue) {
     const result = await sendToBackend(batch);
     if (result.ok) sent += 1;
-    else if (result.reason === 'offline' || result.reason.startsWith('http_5')) remaining.push(batch);
+    else if (RETRYABLE.has(result.reason) || result.reason.startsWith('http_5')) remaining.push(batch);
     // 4xx other than 401 means the server rejected the batch on its merits
     // (quality gate, validation). Retrying will not help, drop it.
   }

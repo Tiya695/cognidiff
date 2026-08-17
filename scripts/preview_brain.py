@@ -4,6 +4,11 @@ Mirrors the geometry in frontend/assets/neural-brain.js so the silhouette can be
 checked without a browser: same ellipsoid, same lobe sculpting, same fissure and
 gyri, rendered with an additive splat to imitate the WebGL blending.
 
+SCOPE: this checks the SILHOUETTE and fold structure only. It does not model
+the filled-volume density or the shader shading the browser now uses, so its
+brightness will not match the real render. For appearance, capture the live
+WebGL canvas instead.
+
     python scripts/preview_brain.py
 
 Writes PNGs into docs/preview/.
@@ -68,7 +73,7 @@ def make_noise(rng, size=64):
 
 def cerebrum_surface(x, y, z, noise):
     """Returns (radius, fold, groove) — mirrors cerebrumSurface() in the JS."""
-    RX, RY, RZ = 0.87, 0.96, 1.14
+    RX, RY, RZ = 0.87, 0.94, 1.18
     r = 1.0 / np.sqrt((x / RX) ** 2 + (y / RY) ** 2 + (z / RZ) ** 2)
 
     r = np.where(z > 0, r * (1 - 0.12 * z ** 2), r)
@@ -90,8 +95,9 @@ def cerebrum_surface(x, y, z, noise):
                * np.minimum(1, np.abs(x) * 2.2))
     r *= 1 - 0.050 * lateral
 
-    n1 = noise(x * 4.3 + 11, y * 4.3 + 23, z * 4.3 + 37)
-    n2 = noise(x * 9.1 + 3, y * 9.1 + 61, z * 9.1 + 17)
+    # anisotropic: ridges elongate front-to-back, mirroring the JS
+    n1 = noise(x * 6.0 + 11, y * 6.0 + 23, z * 2.6 + 37)
+    n2 = noise(x * 12.0 + 3, y * 12.0 + 61, z * 5.0 + 17)
     r *= 1 + 0.085 * (n1 - 0.5) + 0.038 * (n2 - 0.5)
 
     ridge = (1 - np.abs(n1 * 2 - 1)) * 0.68 + (1 - np.abs(n2 * 2 - 1)) * 0.32
@@ -149,8 +155,8 @@ def build_brain(count=COUNT, seed=SEED):
     r *= 1 - 0.13 * np.exp(-(dx * dx) / 0.004)
     shell = 1 - rng.random(n_cb) * 0.30
     parts.append((np.stack([dx * r * shell,
-                            -0.60 + dy * r * shell,
-                            -0.74 + dz * r * shell], 1),
+                            -0.56 + dy * r * shell,
+                            -0.84 + dz * r * shell], 1),
                   0.50 + rng.random(n_cb) * 0.70,
                   0.34 + rng.random(n_cb) * 0.50))
 

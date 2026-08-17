@@ -212,6 +212,65 @@ $('deleteData').addEventListener('click', async () => {
 });
 
 // ---------------------------------------------------------------------------
+// account
+//
+// The missing link that made the extension local-only: batches are sent with a
+// Bearer token, but nothing ever put a token into chrome.storage. Signing in
+// here stores the token, and the pending queue is flushed immediately so
+// sessions captured while signed out reach the account too.
+// ---------------------------------------------------------------------------
+
+async function refreshAccount() {
+  const { auth_token = null, account_name = null } =
+    await chrome.storage.local.get(['auth_token', 'account_name']);
+  const signedIn = Boolean(auth_token);
+  $('signedOut').hidden = signedIn;
+  $('signedIn').hidden = !signedIn;
+  if (signedIn) $('acctName').textContent = account_name || 'you';
+}
+
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = $('acctUser').value.trim();
+  const password = $('acctPass').value;
+  if (!username || !password) { say('Enter your username and password.', true); return; }
+
+  say('Signing in…');
+  try {
+    const res = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) { say(body.detail || 'Sign in failed.', true); return; }
+
+    await chrome.storage.local.set({
+      auth_token: body.access_token,
+      account_name: body.first_name || body.username,
+    });
+    $('acctPass').value = '';
+
+    const drained = await send({ type: 'flush_queue' });
+    say(drained && drained.sent
+      ? `Signed in. ${drained.sent} queued session(s) uploaded.`
+      : 'Signed in. Syncing is on.');
+
+    await refreshAccount();
+    await refreshStats();
+    await refreshLink();
+  } catch {
+    say('Cannot reach the API on port 8000. Is the backend running?', true);
+  }
+});
+
+$('signOutBtn').addEventListener('click', async () => {
+  await chrome.storage.local.remove(['auth_token', 'account_name']);
+  say('Signed out. Capture continues, sessions stay on this device.');
+  await refreshAccount();
+});
+
+// ---------------------------------------------------------------------------
 // boot
 // ---------------------------------------------------------------------------
 
@@ -223,6 +282,7 @@ $('deleteData').addEventListener('click', async () => {
 
   paintToggle(monitoring_active);
   renderAllowlist(site_allowlist);
+  await refreshAccount();
   await refreshStats();
   await refreshLink();
 })();

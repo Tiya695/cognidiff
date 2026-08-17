@@ -38,12 +38,12 @@
 
     // 05 INSIGHT, regather, swing behind to the occipital pole
     5: { cam: [0.55, 0.18, 3.55], target: [0, 0.02, 0], spin: 0, rotY: Math.PI,
-         morph: 0, pulse: false, focus: [0, -0.02, -1.02, 0.60], lines: 0 },
+         morph: 0, pulse: false, focus: [0, -0.04, -1.12, 0.60], lines: 0 },
 
     // 06 BALANCE, pan down onto the cerebellum
-    6: { cam: [0.15, -0.72, 2.95], target: [0, -0.52, -0.35], spin: 0.022,
+    6: { cam: [0.15, -0.72, 2.95], target: [0, -0.50, -0.45], spin: 0.022,
          rotY: Math.PI * 0.82,
-         morph: 0, pulse: false, focus: [0, -0.58, -0.72, 0.44], lines: 0 },
+         morph: 0, pulse: false, focus: [0, -0.56, -0.84, 0.46], lines: 0 },
 
     // 07 SUMMARY, pull back out to the full view, steady rotation
     7: { cam: [0, 0.02, 4.75], target: [0, 0.02, 0], spin: 0.052,

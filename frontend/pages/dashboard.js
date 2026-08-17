@@ -40,7 +40,7 @@
     const score = d.current_score;
 
     if (score == null) {
-      $('scoreNum').textContent = ',';
+      $('scoreNum').textContent = '-';
       $('scoreExplain').textContent = d.message ||
         'Not enough quality sessions yet to produce a score.';
       return;
@@ -53,7 +53,7 @@
     badge.className = 'badge badge--' +
       (band === 'HIGH' ? 'green' : band === 'MODERATE' ? 'yellow' : 'orange');
     $('confText').textContent =
-      `CONFIDENCE ${conf == null ? ',' : Math.round(conf) + '%'} (${band})`;
+      `CONFIDENCE ${conf == null ? '-' : Math.round(conf) + '%'} (${band})`;
 
     $('scoreExplain').textContent = d.provisional
       ? 'This reading is provisional, there is not enough evidence today for a firm result, so no alert is raised from it.'
@@ -65,26 +65,26 @@
       : fmt(d.adjusted_score);
     $('mBlend').textContent = d.task_score == null
       ? 'keystroke only' : `${d.composite_weighting}`;
-    $('mDev').textContent = d.raw_score == null ? ',' : `${fmt(d.deviation_percent)}%`;
+    $('mDev').textContent = d.raw_score == null ? '-' : `${fmt(d.deviation_percent)}%`;
 
     const p = d.lstm_prediction_tomorrow || {};
     $('mPredict').textContent = p.predicted_score == null
-      ? ',' : `${p.predicted_score} (${p.trend || 'unknown'})`;
+      ? '-' : `${p.predicted_score} (${p.trend || 'unknown'})`;
 
     const dc = d.dual_confirmation || {};
     $('mAgree').textContent = ({
       BOTH_AGREE_NORMAL: 'both models: normal',
       BOTH_AGREE_ANOMALOUS: 'both models: unusual',
       MODELS_DISAGREE: 'models disagree',
-    })[dc.agreement] || ',';
+    })[dc.agreement] || '-';
 
     const v = d.versions || {};
     $('versionFoot').textContent =
-      `MODEL ${v.model_version || ','} · BASELINE v${d.user?.baseline_version ?? ','} · ` +
-      `FEATURES ${v.feature_schema_version || ','} · COMMIT ${v.code_commit || ','}`;
+      `MODEL ${v.model_version || '-'} · BASELINE v${d.user?.baseline_version ?? '-'} · ` +
+      `FEATURES ${v.feature_schema_version || '-'} · COMMIT ${v.code_commit || '-'}`;
   }
 
-  const fmt = (n) => (n == null ? ',' : Number(n).toFixed(1));
+  const fmt = (n) => (n == null ? '-' : Number(n).toFixed(1));
 
   function renderDrift(d) {
     const drift = d.drift || {};
@@ -155,7 +155,7 @@
 
       const value = document.createElement('span');
       value.className = 'changes__pct';
-      value.textContent = pct == null ? ',' : `${pct > 0 ? '+' : ''}${Math.round(pct)}%`;
+      value.textContent = pct == null ? '-' : `${pct > 0 ? '+' : ''}${Math.round(pct)}%`;
       li.appendChild(value);
 
       const bar = document.createElement('span');
@@ -174,10 +174,10 @@
   }
 
   function renderQuality(d) {
-    $('qAnalysed').textContent = d.sessions_analysed ?? ',';
-    $('qExcluded').textContent = d.sessions_excluded_quality ?? ',';
+    $('qAnalysed').textContent = d.sessions_analysed ?? '-';
+    $('qExcluded').textContent = d.sessions_excluded_quality ?? '-';
     $('qRate').textContent = d.exclusion_rate_percent == null
-      ? ',' : `${d.exclusion_rate_percent}%`;
+      ? '-' : `${d.exclusion_rate_percent}%`;
     $('qBaseline').textContent =
       `${d.confidence_breakdown ? Math.round((d.confidence_breakdown.baseline_size / 100) * 30) : 0}`;
 
@@ -199,7 +199,7 @@
       for (const [text, cls] of [[r.reason_code, ''], [r.description, ''], [r.n, 'num']]) {
         const td = document.createElement('td');
         td.className = cls;
-        td.textContent = text ?? ',';
+        td.textContent = text ?? '-';
         tr.appendChild(td);
       }
       tbody.appendChild(tr);

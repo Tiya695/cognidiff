@@ -210,6 +210,26 @@ body > *:not(#stars) { position: relative; z-index: 1; }
 .add input::placeholder { color: var(--dim); }
 .add input:focus-visible { outline: 2px solid var(--cyan-hot); outline-offset: 1px; }
 
+/* account */
+.acct { display: grid; gap: 7px; }
+.acct input {
+  width: 100%; padding: 8px 10px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text);
+  background: rgba(4, 9, 28, .68);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.acct input::placeholder { color: var(--dim); }
+.acct input:focus-visible { outline: 2px solid var(--cyan-hot); outline-offset: 1px; }
+.acct-note {
+  margin: 8px 0 0;
+  font-family: var(--mono); font-size: 9.5px; line-height: 1.5;
+  color: var(--dim);
+}
+.acct-who { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.acct-who b { color: var(--cyan); font-weight: 500; }
+
 /* ---------- buttons ---------- */
 
 .actions { display: grid; gap: 7px; margin-bottom: 8px; }

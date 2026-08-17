@@ -34,7 +34,7 @@
     el.classList.toggle('err', isError);
   }
 
-  const fmt = (n, suffix = '') => (n == null ? ',' : `${n}${suffix}`);
+  const fmt = (n, suffix = '') => (n == null ? '-' : `${n}${suffix}`);
 
   function row(tbody, cells) {
     const tr = document.createElement('tr');
@@ -49,7 +49,7 @@
         td.className = 'num';
         td.textContent = cell.num;
       } else {
-        td.textContent = cell == null ? ',' : String(cell);
+        td.textContent = cell == null ? '-' : String(cell);
       }
       tr.appendChild(td);
     }
@@ -83,7 +83,7 @@
     $('reportMeta').textContent = '';
     [
       ['GENERATED', (r.generated_at || '').replace('T', ' ').slice(0, 16)],
-      ['SUBJECT ID', p.user_id || ','],
+      ['SUBJECT ID', p.user_id || '-'],
       ['REPORT', 'COGNITIVE TREND'],
     ].forEach(([k, v]) => {
       const line = document.createElement('div');
@@ -97,8 +97,8 @@
     $('sCurrent').textContent = fmt(r.current_avg_score);
     $('sPrevious').textContent = fmt(r.previous_avg_score);
     $('sChange').textContent = r.score_change_percent == null
-      ? ',' : `${r.score_change_percent > 0 ? '+' : ''}${r.score_change_percent}%`;
-    $('sTrend').textContent = (r.trend_direction || ',').replace(/_/g, ' ');
+      ? '-' : `${r.score_change_percent > 0 ? '+' : ''}${r.score_change_percent}%`;
+    $('sTrend').textContent = (r.trend_direction || '-').replace(/_/g, ' ');
 
     const status = r.alert_status || 'INSUFFICIENT_DATA';
     const badge = $('statusBadge');
@@ -108,7 +108,7 @@
     const cb = $('confidenceBadge');
     const band = r.confidence_band || 'LOW';
     cb.className = `badge badge--${band === 'HIGH' ? 'green' : band === 'MODERATE' ? 'yellow' : 'orange'}`;
-    cb.textContent = `CONFIDENCE ${r.confidence_level == null ? ',' : Math.round(r.confidence_level) + '%'} (${band})`;
+    cb.textContent = `CONFIDENCE ${r.confidence_level == null ? '-' : Math.round(r.confidence_level) + '%'} (${band})`;
 
     $('statusNote').textContent = (STATUS_TEXT[status] || '') +
       (r.provisional ? ' This reading is flagged provisional and no alert is raised from it.' : '');
@@ -116,7 +116,7 @@
     $('dAnalysed').textContent = fmt(r.sessions_analyzed);
     $('dExcluded').textContent = fmt(r.sessions_excluded_quality);
     $('dBaseline').textContent = fmt(bp.sessions);
-    $('dStatus').textContent = (p.baseline_status || ',').replace(/_/g, ' ');
+    $('dStatus').textContent = (p.baseline_status || '-').replace(/_/g, ' ');
 
     // 90-day chart plus the same information written out, because a canvas is
     // invisible to a screen reader and blank on some printers.
@@ -150,8 +150,8 @@
 
     const v = r.versions || {};
     $('provenance').textContent =
-      `MODEL ${v.model_version || ','} · BASELINE v${v.baseline_version ?? ','} · ` +
-      `FEATURE SCHEMA ${v.feature_schema_version || ','} · COMMIT ${v.code_commit || ','}`;
+      `MODEL ${v.model_version || '-'} · BASELINE v${v.baseline_version ?? '-'} · ` +
+      `FEATURE SCHEMA ${v.feature_schema_version || '-'} · COMMIT ${v.code_commit || '-'}`;
 
     $('disclaimer').textContent = r.disclaimer || '';
     toast('');
@@ -185,7 +185,7 @@
         const tr = row(tbody, [
           pt.first_name || pt.username,
           (pt.granted_at || '').slice(0, 10),
-          (pt.baseline_status || ',').replace(/_/g, ' '),
+          (pt.baseline_status || '-').replace(/_/g, ' '),
           '',
         ]);
         const btn = document.createElement('button');

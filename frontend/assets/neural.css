@@ -104,15 +104,20 @@ body {
 
 /* The galaxy field. Two coloured glows over a vertical gradient, exactly the
    deep-navy-with-a-blue-bloom look of the reference scan. */
+/* The reference field is a lit navy, not near-black: a broad blue body with a
+   hard bright corner glow at the top left, and enough base luminance that the
+   stars sit in something rather than on nothing. The first version was far too
+   dark, which is why the scan looked like it was floating in a void. */
 .cosmos {
   position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(90% 65% at 82% 104%, rgba(26, 79, 208, .55), transparent 60%),
-    radial-gradient(70% 55% at 6% -6%,  rgba(56, 189, 248, .18), transparent 58%),
-    radial-gradient(120% 90% at 50% 40%, rgba(11, 32, 80, .55), transparent 70%),
-    linear-gradient(175deg, #061029 0%, var(--bg-deep) 60%, #030713 100%);
+    radial-gradient(38% 30% at 2% -4%, rgba(96, 175, 255, .55), transparent 62%),
+    radial-gradient(70% 52% at 6% 2%,  rgba(40, 108, 224, .34), transparent 66%),
+    radial-gradient(95% 75% at 78% 108%, rgba(26, 84, 208, .40), transparent 64%),
+    radial-gradient(120% 95% at 50% 42%, rgba(16, 46, 116, .55), transparent 72%),
+    linear-gradient(172deg, #0d2354 0%, #0a1a42 45%, #071231 100%);
 }
 
 /* Starfield canvas sits above the gradient, below all content. */

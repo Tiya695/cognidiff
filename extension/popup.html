@@ -35,17 +35,17 @@
     <div class="bar" aria-hidden="true"></div>
 
     <dl class="stats">
-      <div><dt>SESSIONS&nbsp;TODAY</dt><dd id="sToday">,</dd></div>
-      <div><dt>AVG&nbsp;WPM</dt><dd id="sWpm">,</dd></div>
-      <div><dt>AVG&nbsp;IKI</dt><dd id="sIki">,</dd></div>
-      <div><dt>QUEUED</dt><dd id="sQueue">,</dd></div>
+      <div><dt>SESSIONS&nbsp;TODAY</dt><dd id="sToday">-</dd></div>
+      <div><dt>AVG&nbsp;WPM</dt><dd id="sWpm">-</dd></div>
+      <div><dt>AVG&nbsp;IKI</dt><dd id="sIki">-</dd></div>
+      <div><dt>QUEUED</dt><dd id="sQueue">-</dd></div>
     </dl>
   </section>
 
   <section class="panel notice" id="privacy">
     <p class="hdr">&bull;&bull;&bull; PRIVACY NOTICE</p>
     <p class="body">
-      We never store what you type. Only anonymous behavioural features are saved, timing, rhythm and correction counts.
+      We never store what you type. Only anonymous behavioural features are saved: timing, rhythm and correction counts.
     </p>
     <ul class="checks">
       <li>Capture is off on password, payment and login pages</li>
@@ -62,6 +62,24 @@
       <input id="newSite" type="text" placeholder="example.com" autocomplete="off" spellcheck="false">
       <button type="submit" class="btn btn-ghost">ADD</button>
     </form>
+  </section>
+
+  <section class="panel" id="accountPanel">
+    <p class="hdr">&bull;&bull;&bull; ACCOUNT</p>
+    <div id="signedOut">
+      <form id="loginForm" class="acct">
+        <label class="sr" for="acctUser">Username</label>
+        <input id="acctUser" type="text" placeholder="username" autocomplete="username" spellcheck="false">
+        <label class="sr" for="acctPass">Password</label>
+        <input id="acctPass" type="password" placeholder="password" autocomplete="current-password">
+        <button type="submit" class="btn">SIGN IN &amp; SYNC</button>
+      </form>
+      <p class="acct-note">Sessions stay on this device until you sign in.</p>
+    </div>
+    <div id="signedIn" hidden>
+      <p class="acct-who">Signed in as <b id="acctName"></b></p>
+      <button type="button" id="signOutBtn" class="btn btn-ghost">SIGN OUT</button>
+    </div>
   </section>
 
   <div class="actions">
