@@ -3,11 +3,112 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CogniDiff · Neural Mapping</title>
-<meta name="description" content="CogniDiff detects deviation from your own typing baseline, privately and on your terms. A monitoring and screening tool, not a diagnostic device.">
+<title>CogniDiff · Privacy-Preserving Early Cognitive Change Detection</title>
+<meta name="description" content="CogniDiff detects subtle neuromuscular timing deviation from your own typing baseline, privately and on your terms. A monitoring and screening platform, not a diagnostic device.">
 <link rel="icon" href="assets/favicon.png">
-<link rel="stylesheet" href="assets/neural.css">
-<link rel="stylesheet" href="assets/landing.css">
+<link rel="stylesheet" href="assets/neural.css?v=4">
+<link rel="stylesheet" href="assets/landing.css?v=4">
+<style>
+/* Fixed Topbar HUD with protective dark backdrop boxes */
+.topbar {
+  position: fixed !important;
+  z-index: 1000 !important;
+  top: 22px !important;
+  left: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: .75rem !important;
+  pointer-events: auto !important;
+}
+.topbar__brand-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .85rem !important;
+  padding: .52rem 1.2rem !important;
+  background: #04091c !important;
+  background: rgba(3, 7, 20, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(127, 216, 255, 0.22) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.9) !important;
+}
+.topbar__brand {
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase !important;
+  color: var(--text) !important;
+}
+.topbar__sep {
+  display: inline-block !important;
+  width: 22px !important;
+  height: 1px !important;
+  background: var(--line-hot) !important;
+}
+.topbar__tag {
+  font-family: var(--mono) !important;
+  font-size: 10.5px !important;
+  letter-spacing: .28em !important;
+  color: var(--faint) !important;
+}
+.topbar__cta {
+  margin-left: 0 !important;
+  padding: .52rem 1.2rem !important;
+  font-size: 10px !important;
+  background: #04091c !important;
+  background: rgba(3, 7, 20, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(127, 216, 255, 0.22) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.9) !important;
+}
+.topbar__cta:hover {
+  background: rgba(26, 79, 208, 0.38) !important;
+  border-color: var(--cyan) !important;
+}
+
+.hud-login {
+  position: fixed !important;
+  z-index: 1000 !important;
+  top: 22px !important;
+  right: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: .52rem 1.35rem !important;
+  background: #04091c !important;
+  background: rgba(3, 7, 20, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(127, 216, 255, 0.22) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.9) !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: .2em !important;
+  text-transform: uppercase !important;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all .2s ease !important;
+}
+.hud-login:hover {
+  background: rgba(26, 79, 208, 0.38) !important;
+  border-color: var(--cyan) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 28px rgba(0, 229, 255, 0.25) !important;
+}
+
+@media (max-width: 820px) {
+  .topbar { top: 14px !important; left: 14px !important; gap: .5rem !important; }
+  .topbar__brand-box { padding: .42rem .85rem !important; }
+  .topbar__sep, .topbar__tag { display: none !important; }
+  .topbar__cta { padding: .42rem .85rem !important; font-size: 10px !important; }
+  .hud-login { top: 14px !important; right: 14px !important; padding: .42rem .95rem !important; font-size: 10px !important; }
+}
+</style>
 </head>
 <body class="landing">
 
@@ -25,14 +126,15 @@
 </p>
 
 <!-- fixed HUD ---------------------------------------------------------- -->
-<a class="hud-close" href="pages/login.html" aria-label="Close the introduction and sign in">&#10005;</a>
-<a class="hud-mark" href="#state-1" aria-label="Back to the top">C</a>
+<a class="hud-login" href="pages/login.html" aria-label="Sign in to CogniDiff">Login</a>
 
 <nav class="topbar" aria-label="Primary">
-  <span class="topbar__brand">CogniDiff</span>
-  <span class="topbar__sep" aria-hidden="true"></span>
-  <span class="topbar__tag">NEURAL&nbsp;RHYTHM&nbsp;MONITOR</span>
-  <a class="btn btn--ghost topbar__cta" href="pages/login.html">Open dashboard</a>
+  <div class="topbar__brand-box">
+    <span class="topbar__brand">CogniDiff</span>
+    <span class="topbar__sep" aria-hidden="true"></span>
+    <span class="topbar__tag">NEURAL&nbsp;RHYTHM&nbsp;MONITOR</span>
+  </div>
+  <a class="btn topbar__cta" href="pages/login.html">Open dashboard</a>
 </nav>
 
 <main id="scroll">
@@ -40,17 +142,17 @@
   <!-- 01 ARRIVAL ------------------------------------------------------- -->
   <section class="state state--left" id="state-1" data-state="1">
     <div class="state__copy">
-      <p class="tag">ARRIVAL</p>
+      <p class="tag">&gt;&nbsp;01_ARRIVAL</p>
       <h1 class="display">Eighty-six billion neurons, and one quiet keyboard.</h1>
       <p class="lede">
-        Everything you think passes through a body that has to type it. CogniDiff
-        watches only the rhythm of that translation, never the words, and
-        learns what normal looks like for you.
+        Everything you think passes through a neuromuscular system that translates thought
+        into typing. CogniDiff continuously monitors the rhythm of that translation — never
+        the words — learning what normal looks like for you.
       </p>
       <ul class="telemetry">
-        <li>SPECIMEN <b>HUMAN&nbsp;&middot;&nbsp;CEREBRUM</b></li>
-        <li>STATUS <b data-live="status">MAPPING</b></li>
-        <li>RATE <b data-live="rate">4.21 M/S</b></li>
+        <li>STREAM <b>PASSIVE&nbsp;DYNAMICS</b></li>
+        <li>STATUS <b data-live="status">MONITORING</b></li>
+        <li>RATE <b data-live="rate">64&nbsp;WPM</b></li>
       </ul>
     </div>
   </section>
@@ -58,18 +160,17 @@
   <!-- 02 THE BASELINE -------------------------------------------------- -->
   <section class="state state--right" id="state-2" data-state="2">
     <div class="state__copy">
-      <p class="tag">THE&nbsp;BASELINE</p>
+      <p class="tag">&gt;&nbsp;02_THE_BASELINE</p>
       <h2 class="display">Your baseline is you, not an average.</h2>
       <p class="lede">
-        A fast typist and a slow typist are both perfectly normal. CogniDiff never
-        compares you to a population, it builds a statistical picture of your own
-        typing across two weeks, hour by hour, and measures everything after that
-        against it.
+        A fast typist and a deliberate typist are both normal. CogniDiff rejects rigid
+        demographic averages, building an individualized statistical baseline from 14 days
+        of everyday typing, hour by hour, to detect meaningful deviations from your own normal.
       </p>
       <ul class="telemetry">
-        <li>REGION <b>FRONTAL&nbsp;CORTEX</b></li>
-        <li>DEPTH <b>2.0&nbsp;MM</b></li>
-        <li>WINDOW <b data-live="window">14 DAYS</b></li>
+        <li>CALIBRATION <b>14-DAY&nbsp;ROLLING</b></li>
+        <li>QUALITY <b>&gt;60&nbsp;FILTERED</b></li>
+        <li>WINDOW <b data-live="window">14&nbsp;DAYS</b></li>
       </ul>
     </div>
   </section>
@@ -77,24 +178,25 @@
   <!-- 03 SIGNALS, terminal card --------------------------------------- -->
   <section class="state state--center" id="state-3" data-state="3">
     <div class="state__copy state__copy--wide">
-      <p class="tag">SIGNALS</p>
-      <h2 class="display display--center">Everything you are, travelling as electricity.</h2>
+      <p class="tag">&gt;&nbsp;03_KEYSTROKE_DYNAMICS</p>
+      <h2 class="display display--center">Subtle micro-timings, travelling in every keypress.</h2>
 
       <div class="terminal">
         <div class="terminal__bar">
-          <span><span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>SIGNALS&nbsp;LOG</span>
-          <span class="terminal__live">LIVE</span>
+          <span><span class="terminal__dots" aria-hidden="true"><i></i><i></i><i></i></span>SIGNALS&nbsp;STREAM</span>
+          <span class="terminal__live">ACTIVE</span>
         </div>
         <div class="terminal__body">
           <p class="terminal__line">
-            Step inside the traffic. Each keystroke carries a timestamp, a hold
-            duration and a gap, chemical to electric and back, a hundred metres
-            a second, never still.
+            Step inside the signal stream. Each keystroke captures millisecond timing:
+            inter-key intervals (IKI), key hold durations, rhythm variability, and
+            continuous delete-and-retype correction episodes — measuring cognitive
+            load with zero text capture.
           </p>
           <dl class="terminal__rows">
-            <div><dt class="k">RATE</dt><dd class="v" data-live="rate">4.21 M/S</dd></div>
-            <div><dt class="k">CHANNEL</dt><dd class="v">AXONAL</dd></div>
-            <div><dt class="k">CAPTURED</dt><dd class="v">TIMING&nbsp;ONLY</dd></div>
+            <div><dt class="k">INTER-KEY</dt><dd class="v">&lt;150MS&nbsp;BURST</dd></div>
+            <div><dt class="k">HOLD&nbsp;TIME</dt><dd class="v">MILLISEC&nbsp;PRECISION</dd></div>
+            <div><dt class="k">RAW&nbsp;KEYS</dt><dd class="v">ZERO&nbsp;LOGGING</dd></div>
           </dl>
         </div>
         <p class="terminal__prompt">&gt;&nbsp;</p>
@@ -105,54 +207,52 @@
   <!-- 04 THE NETWORK --------------------------------------------------- -->
   <section class="state state--left" id="state-4" data-state="4">
     <div class="state__copy">
-      <p class="tag">THE&nbsp;NETWORK</p>
-      <h2 class="display">Rhythm, not words.</h2>
+      <p class="tag">&gt;&nbsp;04_PRIVACY_ARCHITECTURE</p>
+      <h2 class="display">Rhythm and timing. Never the words.</h2>
       <p class="lede">
-        The scan disperses into what CogniDiff actually keeps: a constellation of
-        timings. How long a key was held. The gap before the next one. How often
-        you delete and retype. Your text never leaves the browser, because it is
-        never read in the first place.
+        CogniDiff extracts an 8-feature behavioral timing vector locally inside the browser
+        extension. How long keys are held, gaps before the next key, and correction episodes.
+        Your typed text never leaves your browser, because it is never recorded in the first place.
       </p>
       <ul class="telemetry">
         <li>RAW&nbsp;TEXT <b class="tel--ok">NEVER&nbsp;STORED</b></li>
         <li>KEY&nbsp;VALUES <b class="tel--ok">NEVER&nbsp;STORED</b></li>
-        <li>NODES <b data-live="nodes">8&nbsp;FEATURES</b></li>
+        <li>VECTORS <b data-live="nodes">8&nbsp;FEATURES</b></li>
       </ul>
     </div>
   </section>
 
   <!-- 05 INSIGHT ------------------------------------------------------- -->
-  <section class="state state--right" id="state-5" data-state="5">
+  <section class="state state--left" id="state-5" data-state="5">
     <div class="state__copy">
-      <p class="tag">INSIGHT</p>
-      <h2 class="display">A number is useless until it tells you why.</h2>
+      <p class="tag">&gt;&nbsp;05_EXPLAINABLE_AI</p>
+      <h2 class="display">A score is useless until it tells you why.</h2>
       <p class="lede">
-        A score of 62 on its own invites either panic or dismissal. So every
-        CogniScore arrives with the three things that moved it, your pauses are
-        21% longer, your corrections are up 14%, in words you can check against
-        your own week.
+        A CogniScore on its own invites confusion or panic. TreeExplainer SHAP values break down
+        every deviation into transparent, plain-English factors: your pauses are 21% longer than
+        usual, corrections are up 14%, and typing rhythm shifted — in words you and your clinician can verify.
       </p>
       <ul class="telemetry">
-        <li>REGION <b>OCCIPITAL&nbsp;LOBE</b></li>
-        <li>METHOD <b>SHAP&nbsp;&middot;&nbsp;ABLATION</b></li>
+        <li>METRIC <b>COGNISCORE&nbsp;0-100</b></li>
+        <li>EXPLAINER <b>SHAP&nbsp;TREE&nbsp;ATTR.</b></li>
         <li>OUTPUT <b data-live="output">TOP&nbsp;3&nbsp;CHANGES</b></li>
       </ul>
     </div>
   </section>
 
-  <!-- 06 BALANCE ------------------------------------------------------- -->
-  <section class="state state--center-low" id="state-6" data-state="6">
+  <!-- 06 DUAL CONFIRMATION --------------------------------------------- -->
+  <section class="state state--center" id="state-6" data-state="6">
     <div class="state__copy">
-      <p class="tag">BALANCE</p>
-      <h2 class="display">The quiet half that keeps you upright.</h2>
-      <p class="lede">
-        One bad night is not a signal. CogniDiff refuses to alarm on a single
-        session, it escalates only on patterns that persist across days, and a
-        low-confidence reading raises nothing at all.
+      <p class="tag">&gt;&nbsp;06_DUAL_CONFIRMATION</p>
+      <h2 class="display display--center">One bad night is not a signal.</h2>
+      <p class="lede lede--center">
+        CogniDiff refuses to alarm on a single fatigued or stressful session. It flags concern
+        only when statistical Z-score deviation and unsupervised Isolation Forest agree across
+        multi-day sessions, holding false-positive rates below 15% through context-aware filtering.
       </p>
-      <ul class="telemetry">
-        <li>REGION <b>CEREBELLUM</b></li>
-        <li>NEURONS <b>69.8&nbsp;B</b></li>
+      <ul class="telemetry telemetry--center">
+        <li>ANOMALY <b>ISOLATION&nbsp;FOREST</b></li>
+        <li>VALIDATION <b>DUAL&nbsp;PIPELINE</b></li>
         <li>FALSE&nbsp;POSITIVES <b data-live="fp">&lt;15%</b></li>
       </ul>
     </div>
@@ -161,13 +261,12 @@
   <!-- 07 SUMMARY ------------------------------------------------------- -->
   <section class="state state--center" id="state-7" data-state="7">
     <div class="state__copy state__copy--wide">
-      <p class="tag">SUMMARY</p>
+      <p class="tag">&gt;&nbsp;07_CLINICAL_INTEGRITY</p>
       <h2 class="display display--center">Detection of change. Never a diagnosis.</h2>
       <p class="lede lede--center">
-        CogniDiff detects deviation from an individual's own typing baseline. It
-        does not detect, diagnose or confirm cognitive decline, and no clinical
-        sensitivity or specificity is claimed, because no clinically labelled
-        data was used.
+        CogniDiff detects subtle deviations from an individual's own typing baseline to support
+        longitudinal health awareness. It is a screening and monitoring tool, not a diagnostic
+        device — empowering early, objective conversations with qualified healthcare professionals.
       </p>
 
       <div class="cta">
@@ -176,9 +275,9 @@
       </div>
 
       <ul class="telemetry telemetry--center">
-        <li>SCAN <b>COMPLETE</b></li>
-        <li>MODE <b>SCREENING&nbsp;&middot;&nbsp;MONITORING</b></li>
-        <li>BUILD <b>v1.0</b></li>
+        <li>STATUS <b>SCREENING&nbsp;ONLY</b></li>
+        <li>ACCESS <b>RBAC&nbsp;&middot;&nbsp;CONSENT</b></li>
+        <li>VERSION <b>v1.0&nbsp;AUDITED</b></li>
       </ul>
     </div>
   </section>
@@ -187,7 +286,7 @@
 
 <footer class="landing-foot">
   <p>
-    CogniDiff is a monitoring and screening tool. It does not diagnose any medical
+    CogniDiff is a monitoring and screening platform. It does not diagnose any medical
     condition. Results should be interpreted by a qualified healthcare professional.
   </p>
 </footer>

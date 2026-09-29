@@ -1,25 +1,10 @@
-"""Offline preview of the procedural brain point cloud.
-
-Mirrors the geometry in frontend/assets/neural-brain.js so the silhouette can be
-checked without a browser: same ellipsoid, same lobe sculpting, same fissure and
-gyri, rendered with an additive splat to imitate the WebGL blending.
-
-SCOPE: this checks the SILHOUETTE and fold structure only. It does not model
-the filled-volume density or the shader shading the browser now uses, so its
-brightness will not match the real render. For appearance, capture the live
-WebGL canvas instead.
-
-    python scripts/preview_brain.py
-
-Writes PNGs into docs/preview/.
-"""
+"""Offline preview of the procedural brain point cloud with VISIBLE MATTE BLUE matching Image 2."""
 
 from __future__ import annotations
 
 import math
 import os
 import struct
-import sys
 import zlib
 
 import numpy as np
@@ -28,260 +13,282 @@ OUT_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "preview"
 )
 
-W, H = 900, 620
-COUNT = 90_000
+W, H = 900, 900
+COUNT = 115_000
 SEED = 20260817
 
 
-# ---------------------------------------------------------------------------
-# value noise, matching the JS implementation
-# ---------------------------------------------------------------------------
-
-def make_noise(rng, size=64):
-    table = rng.random((size, size, size))
-
-    def noise(x, y, z):
-        xi = np.floor(x).astype(int)
-        yi = np.floor(y).astype(int)
-        zi = np.floor(z).astype(int)
-        xf, yf, zf = x - xi, y - yi, z - zi
-
-        fade = lambda t: t * t * (3 - 2 * t)
-        xf, yf, zf = fade(xf), fade(yf), fade(zf)
-
-        m = size - 1
-        at = lambda a, b, c: table[(a & m), (b & m), (c & m)]
-
-        c000, c100 = at(xi, yi, zi),         at(xi + 1, yi, zi)
-        c010, c110 = at(xi, yi + 1, zi),     at(xi + 1, yi + 1, zi)
-        c001, c101 = at(xi, yi, zi + 1),     at(xi + 1, yi, zi + 1)
-        c011, c111 = at(xi, yi + 1, zi + 1), at(xi + 1, yi + 1, zi + 1)
-
-        lerp = lambda a, b, t: a + (b - a) * t
-        return lerp(
-            lerp(lerp(c000, c100, xf), lerp(c010, c110, xf), yf),
-            lerp(lerp(c001, c101, xf), lerp(c011, c111, xf), yf),
-            zf,
-        )
-
-    return noise
-
-
-# ---------------------------------------------------------------------------
-# geometry (port of cerebrumRadius)
-# ---------------------------------------------------------------------------
-
-def cerebrum_surface(x, y, z, noise):
-    """Returns (radius, fold, groove) — mirrors cerebrumSurface() in the JS."""
-    RX, RY, RZ = 0.87, 0.94, 1.18
-    r = 1.0 / np.sqrt((x / RX) ** 2 + (y / RY) ** 2 + (z / RZ) ** 2)
-
-    r = np.where(z > 0, r * (1 - 0.12 * z ** 2), r)
-    r = np.where(z < -0.6, r * (1 - 0.09 * np.abs(-z - 0.6) ** 1.5), r)
-
-    temporal = (np.maximum(0, -y - 0.02)
-                * np.maximum(0, np.abs(x) - 0.22)
-                * np.maximum(0, 0.88 - np.abs(z + 0.1)))
-    r *= 1 + 1.25 * temporal
-
-    r = np.where(y < -0.52, r * (1 - 0.30 * np.abs(-y - 0.52) ** 1.3), r)
-
-    midline = np.exp(-(x * x) / 0.0026)
-    r *= 1 - 0.20 * midline * np.maximum(0, y + 0.05)
-
-    central = np.exp(-((z - 0.02) * 3.1 - y * 1.4) ** 2 * 5.0)
-    r *= 1 - 0.040 * central
-    lateral = (np.exp(-((y + 0.18) * 4.4 + (z + 0.1) * 0.8) ** 2 * 4.0)
-               * np.minimum(1, np.abs(x) * 2.2))
-    r *= 1 - 0.050 * lateral
-
-    # anisotropic: ridges elongate front-to-back, mirroring the JS
-    n1 = noise(x * 6.0 + 11, y * 6.0 + 23, z * 2.6 + 37)
-    n2 = noise(x * 12.0 + 3, y * 12.0 + 61, z * 5.0 + 17)
-    r *= 1 + 0.085 * (n1 - 0.5) + 0.038 * (n2 - 0.5)
-
-    ridge = (1 - np.abs(n1 * 2 - 1)) * 0.68 + (1 - np.abs(n2 * 2 - 1)) * 0.32
-    fold = np.clip(ridge, 0, 1) ** 2.1
-    groove = np.maximum(np.maximum(central, lateral), midline)
-    return r, fold, groove
-
-
-def unit_dirs(rng, n):
-    u = rng.random(n) * 2 - 1
-    phi = rng.random(n) * 2 * math.pi
-    s = np.sqrt(np.maximum(0, 1 - u * u))
-    return s * np.cos(phi), u, s * np.sin(phi)
-
-
-def build_brain(count=COUNT, seed=SEED):
+def generate_brain(count=COUNT, seed=SEED):
     rng = np.random.default_rng(seed)
-    noise = make_noise(np.random.default_rng(seed ^ 0x9E3779B9))
 
-    n_surf = int(count * 0.70)
-    n_int = int(count * 0.08)
-    n_cb = int(count * 0.13)
-    n_stem = count - n_surf - n_int - n_cb
+    n_cortex = int(count * 0.77)
+    n_cerebellum = int(count * 0.17)
+    n_stem = count - n_cortex - n_cerebellum
 
-    parts = []
+    # Anatomical gyral centers per hemisphere (x > 0)
+    hemi_seeds = [
+        # Superior sagittal row (along midline)
+        [0.16, 0.80, 0.20],
+        [0.17, 0.78, -0.15],
+        [0.15, 0.68, 0.48],
+        [0.16, 0.65, -0.45],
+        [0.14, 0.50, 0.68],
+        [0.14, 0.46, -0.68],
+        [0.12, 0.25, 0.78],
+        [0.12, 0.20, -0.78],
 
-    # cerebral surface — rejection-sampled toward the gyral crowns
-    cand = n_surf * 6
-    dx, dy, dz = unit_dirs(rng, cand)
-    r, fold, groove = cerebrum_surface(dx, dy, dz, noise)
-    keep = rng.random(cand) <= (0.16 + 0.84 * fold)
-    idx = np.flatnonzero(keep)[:n_surf]
-    dx, dy, dz = dx[idx], dy[idx], dz[idx]
-    r, fold, groove = r[idx], fold[idx], groove[idx]
-    n_kept = len(idx)
+        # Mid-dorsal / Frontal & Parietal face
+        [0.36, 0.72, 0.22],
+        [0.38, 0.70, -0.16],
+        [0.34, 0.58, 0.50],
+        [0.36, 0.54, -0.50],
+        [0.32, 0.38, 0.68],
+        [0.32, 0.32, -0.68],
+        [0.30, 0.16, 0.75],
+        [0.30, 0.10, -0.75],
 
-    r = r * (1 - rng.random(n_kept) * 0.030)
-    brightness = (0.28 + 0.90 * fold) * (1 - 0.50 * groove)
-    parts.append((np.stack([dx * r, dy * r + 0.06, dz * r], 1),
-                  0.42 + rng.random(n_kept) * 0.62 + fold * 0.45,
-                  np.minimum(1, 0.10 + rng.random(n_kept) * 0.22 + brightness * 0.80)))
+        # Lateral crown / Precentral & Postcentral bulges
+        [0.58, 0.55, 0.18],
+        [0.60, 0.52, -0.20],
+        [0.54, 0.42, 0.48],
+        [0.56, 0.38, -0.50],
+        [0.50, 0.22, 0.62],
+        [0.50, 0.16, -0.62],
 
-    # interior volume
-    dx, dy, dz = unit_dirs(rng, n_int)
-    r, _, _ = cerebrum_surface(dx, dy, dz, noise)
-    r = r * (0.30 + rng.random(n_int) * 0.58)
-    parts.append((np.stack([dx * r, dy * r + 0.06, dz * r], 1),
-                  0.32 + rng.random(n_int) * 0.34,
-                  0.05 + rng.random(n_int) * 0.13))
+        # Temporal & lateral under-curving lobes
+        [0.70, 0.25, 0.15],
+        [0.70, 0.20, -0.18],
+        [0.66, 0.04, 0.34],
+        [0.66, -0.02, -0.34],
+        [0.58, -0.14, 0.42],
+        [0.56, -0.18, -0.40],
+        [0.44, -0.16, 0.15],
+        [0.44, -0.18, -0.15],
+    ]
+    hemi_seeds = np.array(hemi_seeds, dtype=np.float32)
+    all_seeds = np.concatenate([
+        hemi_seeds,
+        hemi_seeds * np.array([-1.0, 1.0, 1.0], dtype=np.float32)
+    ], axis=0)
 
-    # cerebellum
-    dx, dy, dz = unit_dirs(rng, n_cb)
-    r = 1.0 / np.sqrt((dx / 0.60) ** 2 + (dy / 0.30) ** 2 + (dz / 0.40) ** 2)
-    r *= 1 + 0.05 * (noise(dx * 9 + 5, dy * 34 + 9, dz * 9 + 2) - 0.5)
-    r *= 1 - 0.13 * np.exp(-(dx * dx) / 0.004)
-    shell = 1 - rng.random(n_cb) * 0.30
-    parts.append((np.stack([dx * r * shell,
-                            -0.56 + dy * r * shell,
-                            -0.84 + dz * r * shell], 1),
-                  0.50 + rng.random(n_cb) * 0.70,
-                  0.34 + rng.random(n_cb) * 0.50))
+    # 1. CEREBRUM SURFACE
+    u = rng.uniform(-0.62, 0.98, n_cortex)
+    phi = rng.uniform(0, 2 * np.pi, n_cortex)
+    s = np.sqrt(np.maximum(0, 1.0 - u * u))
 
-    # brainstem
-    t = rng.random(n_stem)
-    rad = (0.185 - 0.055 * t) * (0.80 + rng.random(n_stem) * 0.20)
-    ang = rng.random(n_stem) * 2 * math.pi
-    parts.append((np.stack([np.cos(ang) * rad,
-                            -0.46 - t * 0.62,
-                            -0.20 + np.sin(ang) * rad * 0.85], 1),
-                  0.45 + rng.random(n_stem) * 0.55,
-                  0.30 + rng.random(n_stem) * 0.46))
+    dx = s * np.sin(phi)
+    dy = u
+    dz = s * np.cos(phi)
 
-    pos = np.concatenate([p[0] for p in parts])
-    size = np.concatenate([p[1] for p in parts])
-    alpha = np.concatenate([p[2] for p in parts])
-    return pos, size, alpha
+    RX, RY, RZ = 0.85, 0.84, 0.92
+    bx = dx * RX
+    by = dy * RY + 0.14
+    bz = dz * RZ
+
+    # Longitudinal fissure
+    fissure = 0.20 * np.exp(-((bx / 0.080) ** 2)) * np.clip((by + 0.18) / 0.78, 0.2, 1.25)
+    bx_sign = np.sign(bx)
+    bx_sign[bx_sign == 0] = 1.0
+    bx = bx - bx_sign * fissure * 0.28
+
+    under_cb = np.maximum(0.0, -0.06 - by)
+    by += under_cb * 0.30
+
+    P = np.stack([bx, by, bz], axis=1)
+
+    gyri_puff = np.zeros(n_cortex, dtype=np.float32)
+    chunk_size = 20000
+    for start in range(0, n_cortex, chunk_size):
+        end = min(start + chunk_size, n_cortex)
+        p_chk = P[start:end]
+        diff = p_chk[:, None, :] - all_seeds[None, :, :]
+        d2 = np.sum(diff * diff, axis=2)
+        part = np.partition(d2, 1, axis=1)
+        d1 = np.sqrt(part[:, 0])
+        d2 = np.sqrt(part[:, 1])
+
+        cell_r = 0.24
+        crest = np.cos(np.clip(d1 / cell_r, 0.0, 1.0) * (math.pi / 2.0)) ** 2
+        sulcus = np.tanh((d2 - d1) / 0.045)
+        gyri_puff[start:end] = crest * (0.35 + 0.65 * sulcus)
+
+    hemi_cx = np.where(bx >= 0, 0.18, -0.18)
+    dir_x = bx - hemi_cx
+    dir_y = by - 0.10
+    dir_z = bz
+    dir_len = np.sqrt(dir_x ** 2 + dir_y ** 2 + dir_z ** 2 + 1e-6)
+    dir_x /= dir_len; dir_y /= dir_len; dir_z /= dir_len
+
+    mound_disp = (gyri_puff - 0.30) * 0.18
+    micro = np.sin(bx * 26.0) * np.sin(by * 26.0) * np.sin(bz * 26.0) * 0.012
+
+    px = bx + dir_x * (mound_disp + micro)
+    py = by + dir_y * (mound_disp + micro)
+    pz = bz + dir_z * (mound_disp + micro)
+
+    depth = (rng.uniform(0, 1, n_cortex) ** 2.2) * 0.075
+    px -= dir_x * depth
+    py -= dir_y * depth
+    pz -= dir_z * depth
+
+    nx = dir_x + dir_x * mound_disp * 1.8
+    ny = dir_y + dir_y * mound_disp * 1.8
+    nz = dir_z
+    n_len = np.sqrt(nx ** 2 + ny ** 2 + nz ** 2 + 1e-6)
+    nx /= n_len; ny /= n_len; nz /= n_len
+
+    alpha = np.clip(0.38 + 0.58 * gyri_puff - depth * 3.5, 0.22, 0.95)
+    size = 0.40 + 0.24 * gyri_puff + rng.uniform(0, 0.2, n_cortex)
+
+    pts_cortex = (np.stack([px, py, pz], 1), size, alpha, np.stack([nx, ny, nz], 1), gyri_puff)
+
+    # 2. CEREBELLUM
+    pts_cb = []
+    n_cb_half = n_cerebellum // 2
+    for sign in (-1.0, 1.0):
+        cx = sign * 0.32
+        cy = -0.32
+        cz = -0.15
+        rx, ry, rz = 0.31, 0.19, 0.27
+
+        u = rng.uniform(-0.95, 0.95, n_cb_half)
+        phi = rng.uniform(0, 2 * np.pi, n_cb_half)
+        theta = np.arccos(u)
+
+        dx = np.sin(theta) * np.cos(phi)
+        dy = np.cos(theta)
+        dz = np.sin(theta) * np.sin(phi)
+
+        folia = np.sin((cy + dy * ry) * 78.0)
+        rad = 1.0 + folia * 0.045
+
+        cpx = cx + dx * rx * rad
+        cpy = cy + dy * ry * rad
+        cpz = cz + dz * rz * rad
+
+        depth_cb = (rng.uniform(0, 1, n_cb_half) ** 2.0) * 0.05
+        cpx -= dx * depth_cb
+        cpy -= dy * depth_cb
+        cpz -= dz * depth_cb
+
+        norm_folia = np.clip((folia + 1.0) * 0.5, 0.0, 1.0)
+        al_cb = np.clip(0.35 + 0.50 * norm_folia, 0.22, 0.90)
+        sz_cb = 0.36 + rng.uniform(0, 0.2, n_cb_half)
+
+        pts_cb.append((np.stack([cpx, cpy, cpz], 1), sz_cb, al_cb, np.stack([dx, dy, dz], 1), norm_folia))
+
+    # 3. BRAINSTEM
+    t = rng.uniform(0, 1, n_stem)
+    pons = 0.046 * np.exp(-((t - 0.22) ** 2) / 0.018)
+    rad_stem = (0.11 - 0.038 * t + pons) * np.sqrt(rng.uniform(0.18, 1.0, n_stem))
+    ang = rng.uniform(0, 2 * np.pi, n_stem)
+
+    sx = np.cos(ang) * rad_stem
+    sy = -0.28 - t * 0.56
+    sz = -0.08 + np.sin(ang) * rad_stem * 0.75
+
+    stem_alpha = 0.35 + rng.uniform(0, 0.35, n_stem)
+    stem_size = 0.36 + rng.uniform(0, 0.2, n_stem)
+    snx = np.cos(ang)
+    sny = np.zeros_like(ang)
+    snz = np.sin(ang)
+    stem_elev = np.full(n_stem, 0.55, dtype=np.float32)
+
+    all_pos = np.concatenate([pts_cortex[0]] + [p[0] for p in pts_cb] + [np.stack([sx, sy, sz], 1)])
+    all_sz  = np.concatenate([pts_cortex[1]] + [p[1] for p in pts_cb] + [stem_size])
+    all_al  = np.concatenate([pts_cortex[2]] + [p[2] for p in pts_cb] + [stem_alpha])
+    all_norm= np.concatenate([pts_cortex[3]] + [p[3] for p in pts_cb] + [np.stack([snx, sny, snz], 1)])
+    all_elev= np.concatenate([pts_cortex[4]] + [p[4] for p in pts_cb] + [stem_elev])
+
+    return all_pos, all_sz, all_al, all_norm, all_elev
 
 
-# ---------------------------------------------------------------------------
-# rendering — additive splat, mimicking the WebGL point sprites
-# ---------------------------------------------------------------------------
+def render_normal_blend(pos, size, alpha, normals, elev, tilt_x=0.14):
+    p = pos.copy()
+    norm = normals.copy()
 
-def look_at(eye, target, up=(0, 1, 0)):
-    f = np.array(target, float) - np.array(eye, float)
-    f /= np.linalg.norm(f)
-    u = np.array(up, float)
-    s = np.cross(f, u); s /= np.linalg.norm(s)
-    u = np.cross(s, f)
-    return np.stack([s, u, -f])          # rows = camera basis
+    cx, sx = math.cos(tilt_x), math.sin(tilt_x)
+    Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
+    p = p @ Rx.T
+    norm = norm @ Rx.T
 
-
-def render(pos, size, alpha, eye, target, rot_y=0.0, fov=42.0,
-           focus=None, pulse=None):
-    c, s = math.cos(rot_y), math.sin(rot_y)
-    R = np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
-    p = pos @ R.T
-
-    M = look_at(eye, target)
-    cam = (p - np.array(eye, float)) @ M.T
-    zc = -cam[:, 2]
-
-    keep = zc > 0.05
-    cam, zc = cam[keep], zc[keep]
-    sz, al = size[keep], alpha[keep]
-    src = pos[keep]
-
-    heat = np.zeros(len(cam))
-    if focus is not None:
-        fx, fy, fz, fr = focus
-        d = np.linalg.norm(src - np.array([fx, fy, fz]), axis=1)
-        heat = np.maximum(heat, np.clip(1 - (d - fr * 0.25) / (fr * 0.75), 0, 1))
-    if pulse is not None:
-        axis = (src[:, 2] + 1.35) / 2.7
-        heat = np.maximum(heat, np.clip(1 - np.abs(axis - pulse) / 0.13, 0, 1))
-
+    zc = 3.25 - p[:, 2]
+    fov = 34.0
     fpx = (H / 2) / math.tan(math.radians(fov) / 2)
-    x = cam[:, 0] / zc * fpx + W / 2
-    y = -cam[:, 1] / zc * fpx + H / 2
-    r = np.clip(sz * (34.0 / zc) * 0.45, 0.5, 6.0)
+
+    x = p[:, 0] / zc * fpx + W / 2
+    y = -p[:, 1] / zc * fpx + H / 2
+
+    # Lighting matching Image 2
+    light_dir = np.array([0.22, 0.85, 0.52])
+    light_dir /= np.linalg.norm(light_dir)
+    diffuse = np.maximum(0.0, norm @ light_dir)
+    cam_fill = np.maximum(0.0, norm[:, 2])
+    rim = np.clip(1.0 - np.abs(norm[:, 2]), 0.0, 1.0) ** 1.8
+
+    illum = 0.20 + 0.35 * diffuse + 0.25 * cam_fill + 0.38 * rim + 0.35 * elev
+
+    # Palette matching Image 2
+    base_blue = np.array([0.05, 0.20, 0.55], np.float32)
+    mid_blue  = np.array([0.16, 0.50, 0.94], np.float32)
+    crest_blue= np.array([0.42, 0.80, 1.00], np.float32)
+
+    t = np.clip(illum, 0.0, 1.0)
+    col = np.zeros((len(t), 3), np.float32)
+    m1 = t < 0.50
+    col[m1] = base_blue[None, :] * (1.0 - t[m1, None] * 2.0) + mid_blue[None, :] * (t[m1, None] * 2.0)
+    m2 = ~m1
+    col[m2] = mid_blue[None, :] * (1.0 - (t[m2, None] - 0.5) * 2.0) + crest_blue[None, :] * ((t[m2, None] - 0.5) * 2.0)
 
     img = np.zeros((H, W, 3), np.float32)
-    base = np.array([0.369, 0.784, 0.961])       # #5ec8f5
-    hot = np.array([0.914, 0.984, 1.0])          # #e9fbff
+    yy, xx = np.mgrid[0:H, 0:W]
+    u, v = xx / W, yy / H
+    d_center = np.sqrt(((u - 0.5) * 1.0) ** 2 + ((v - 0.48) * 1.0) ** 2)
+    bg_glow = np.clip(1.0 - d_center / 0.58, 0.0, 1.0) ** 2.2
+    img += np.array([0.012, 0.030, 0.070])[None, None, :] * bg_glow[..., None]
+    img += np.array([0.004, 0.007, 0.016])[None, None, :]
 
-    order = np.argsort(-zc)
-    x, y, r, al, heat = x[order], y[order], r[order], al[order], heat[order]
+    order = np.argsort(zc)
+    x, y, col, alpha = x[order], y[order], col[order], alpha[order]
 
     xi = np.round(x).astype(int)
     yi = np.round(y).astype(int)
-    ok = (xi >= 2) & (xi < W - 2) & (yi >= 2) & (yi < H - 2)
-    xi, yi, r, al, heat = xi[ok], yi[ok], r[ok], al[ok], heat[ok]
+    valid = (xi >= 1) & (xi < W - 1) & (yi >= 1) & (yi < H - 1)
 
-    col = base[None, :] * (1 - heat[:, None]) + hot[None, :] * heat[:, None]
-    weight = al * (1 + heat * 1.6)
+    xi, yi, col, alpha = xi[valid], yi[valid], col[valid], alpha[valid]
 
-    # 3x3 splat with a soft falloff
-    for dy in (-1, 0, 1):
-        for dx in (-1, 0, 1):
-            d2 = dx * dx + dy * dy
-            fall = math.exp(-d2 / 1.5)
-            contrib = (col * (weight * fall * 0.17)[:, None]).astype(np.float32)
-            np.add.at(img, (yi + dy, xi + dx), contrib)
+    weights = [
+        (0, 0, 1.0),
+        (-1, 0, 0.55), (1, 0, 0.55), (0, -1, 0.55), (0, 1, 0.55),
+        (-1, -1, 0.28), (1, -1, 0.28), (-1, 1, 0.28), (1, 1, 0.28)
+    ]
+    accum_col = np.zeros((H, W, 3), np.float32)
+    accum_w = np.zeros((H, W), np.float32)
 
-    return img
+    for dx, dy, w_factor in weights:
+        cur_x = xi + dx
+        cur_y = yi + dy
+        v = (cur_x >= 0) & (cur_x < W) & (cur_y >= 0) & (cur_y < H)
+        w = alpha[v] * w_factor * 0.38
+        np.add.at(accum_col, (cur_y[v], cur_x[v], 0), col[v, 0] * w)
+        np.add.at(accum_col, (cur_y[v], cur_x[v], 1), col[v, 1] * w)
+        np.add.at(accum_col, (cur_y[v], cur_x[v], 2), col[v, 2] * w)
+        np.add.at(accum_w, (cur_y[v], cur_x[v]), w)
 
+    img_rgb = img.copy()
+    for c in range(3):
+        blended = img_rgb[:, :, c] + accum_col[:, :, c]
+        img_rgb[:, :, c] = np.clip(blended / (1.0 + blended * 0.38), 0.0, 1.0)
 
-def compose(img):
-    """Lay the additive point cloud over the CSS background field."""
-    yy, xx = np.mgrid[0:H, 0:W]
-    u, v = xx / W, yy / H
-
-    bg = np.zeros((H, W, 3), np.float32)
-    top = np.array([0.024, 0.063, 0.161])
-    bot = np.array([0.012, 0.027, 0.075])
-    bg += top * (1 - v[..., None]) + bot * v[..., None]
-
-    def radial(cx, cy, rad, colour, amp):
-        d = np.sqrt(((u - cx) * (W / H)) ** 2 + (v - cy) ** 2)
-        g = np.clip(1 - d / rad, 0, 1) ** 2
-        return (np.array(colour) * amp)[None, None, :] * g[..., None]
-
-    bg += radial(0.82, 1.04, 1.05, (0.102, 0.310, 0.816), 0.55)
-    bg += radial(0.06, -0.06, 0.85, (0.220, 0.741, 0.973), 0.20)
-
-    rng = np.random.default_rng(7)
-    n = 260
-    sx = (rng.random(n) * W).astype(int)
-    sy = (rng.random(n) * H).astype(int)
-    sa = rng.random(n) * 0.55 + 0.12
-    bg[sy, sx] += np.array([0.84, 0.93, 1.0])[None, :] * sa[:, None]
-
-    out = bg + img
-    out = out / (1 + out * 0.55)            # soft filmic rolloff
-    return np.clip(out * 255, 0, 255).astype(np.uint8)
+    return np.clip(img_rgb * 255, 0, 255).astype(np.uint8)
 
 
 def write_png(path, rgb):
     h, w, _ = rgb.shape
     raw = b"".join(b"\x00" + rgb[y].tobytes() for y in range(h))
-
     def chunk(tag, data):
         body = tag + data
         return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
-
     png = (b"\x89PNG\r\n\x1a\n"
            + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0))
            + chunk(b"IDAT", zlib.compress(raw, 6))
@@ -290,31 +297,13 @@ def write_png(path, rgb):
         f.write(png)
 
 
-STATES = {
-    "01_arrival":  dict(eye=(0, 0.02, 4.25), target=(0, 0.04, 0), rot_y=0.0),
-    "02_baseline": dict(eye=(0.35, 1.15, 2.30), target=(0, 0.34, 0), rot_y=0.55),
-    "03_signals":  dict(eye=(0, 0.02, 3.05), target=(0, 0.02, 0), rot_y=1.2, pulse=0.55),
-    "05_insight":  dict(eye=(0.55, 0.18, 3.55), target=(0, 0.02, 0), rot_y=math.pi,
-                        focus=(0, -0.02, -1.02, 0.78)),
-    "06_balance":  dict(eye=(0.15, -0.72, 2.95), target=(0, -0.52, -0.35),
-                        rot_y=math.pi * 0.82, focus=(0, -0.60, -0.74, 0.62)),
-    "07_summary":  dict(eye=(0, 0.02, 4.75), target=(0, 0.02, 0), rot_y=2.4),
-}
-
-
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
-    print("building point cloud …")
-    pos, size, alpha = build_brain()
-
-    only = sys.argv[1] if len(sys.argv) > 1 else None
-    for name, cfg in STATES.items():
-        if only and only not in name:
-            continue
-        img = render(pos, size, alpha, **cfg)
-        path = os.path.join(OUT_DIR, f"brain_{name}.png")
-        write_png(path, compose(img))
-        print("wrote", path)
+    pos, sz, al, norm, elev = generate_brain()
+    img = render_normal_blend(pos, sz, al, norm, elev, tilt_x=0.14)
+    path = os.path.join(OUT_DIR, "brain_01_arrival.png")
+    write_png(path, img)
+    print("wrote", path)
 
 
 if __name__ == "__main__":
