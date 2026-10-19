@@ -7,7 +7,7 @@
  * server is offline, and it is never sent anywhere else.
  */
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'http://localhost:8001';
 const MAX_LOCAL_SESSIONS = 5000;      // ring buffer, keeps storage bounded
 const MAX_QUEUE = 500;
 
@@ -204,7 +204,7 @@ async function grantedHosts() {
   const hosts = new Set();
   for (const origin of perms.origins || []) {
     const m = origin.match(/^https?:\/\/([^/*]+)\/?\*?$/);
-    if (m && m[1] && m[1] !== 'localhost:8000') hosts.add(m[1]);
+    if (m && m[1] && m[1] !== 'localhost:8001') hosts.add(m[1]);
   }
   return hosts;
 }

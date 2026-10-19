@@ -57,7 +57,7 @@ python -m backend.seed_demo --days 75 --reset
 Start the API:
 
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --reload --port 8001
 ```
 
 Start the web app in a second terminal:

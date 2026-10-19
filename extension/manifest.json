@@ -15,7 +15,7 @@
   ],
   "optional_host_permissions": ["https://*/*", "http://*/*"],
 
-  "host_permissions": ["http://localhost:8000/*"],
+  "host_permissions": ["http://localhost:8001/*"],
 
   "background": {
     "service_worker": "background.js",

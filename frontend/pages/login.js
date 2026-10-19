@@ -92,6 +92,6 @@
 
   // Surface a dead backend before the user types a password into nothing.
   api.health().catch(() => {
-    say('Cannot reach the CogniDiff API on port 8000. Start it with: uvicorn backend.main:app --port 8000', true);
+    say('Cannot reach the CogniDiff API on port 8001. Start it with: uvicorn backend.main:app --port 8001', true);
   });
 })();

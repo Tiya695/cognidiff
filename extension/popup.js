@@ -204,7 +204,7 @@ async function refreshStats() {
 async function refreshLink() {
   const pill = $('linkState');
   try {
-    const res = await fetch('http://localhost:8000/api/health', { cache: 'no-store' });
+    const res = await fetch('http://localhost:8001/api/health', { cache: 'no-store' });
     const ok = res.ok;
     pill.textContent = ok ? 'LINKED' : 'DEGRADED';
     pill.className = `pill ${ok ? 'pill-on' : 'pill-off'}`;
@@ -283,7 +283,7 @@ $('loginForm').addEventListener('submit', async (e) => {
 
   say('Signing in…');
   try {
-    const res = await fetch('http://localhost:8000/api/auth/login', {
+    const res = await fetch('http://localhost:8001/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -306,7 +306,7 @@ $('loginForm').addEventListener('submit', async (e) => {
     await refreshStats();
     await refreshLink();
   } catch {
-    say('Cannot reach the API on port 8000. Is the backend running?', true);
+    say('Cannot reach the API on port 8001. Is the backend running?', true);
   }
 });
 

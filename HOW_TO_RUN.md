@@ -46,7 +46,7 @@ You'll know it worked because `(venv)` appears at the start of the line:
 **Step 2.** Start the backend:
 
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --reload --port 8001
 ```
 
 You should see `Application startup complete.`
@@ -159,14 +159,14 @@ permissions"**
 Something is already using that port, usually an old terminal you left open.
 Close the other terminals and try again. To find and stop it:
 ```bash
-netstat -ano | findstr :8000
+netstat -ano | findstr :8001
 ```
 Then `taskkill /PID <the number at the end> /F`.
 
 **The website says "Cannot reach the CogniDiff API"**
 The backend isn't running. Go back to Part 1.
 
-**`127.0.0.1:8000` shows text instead of the website**
+**`127.0.0.1:8001` shows text instead of the website**
 That's correct, that's the backend and it has no pages. The website is on
 port **3000**.
 

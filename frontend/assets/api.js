@@ -3,7 +3,7 @@
  * Two rules this file exists to enforce:
  *
  *  1. The base URL lives here and nowhere else. No page hardcodes
- *     http://localhost:8000, that was a Phase 6 finding.
+ *     http://localhost:8001, that was a Phase 6 finding.
  *  2. The identity is the token. Nothing in the frontend ever sends a user_id;
  *     the server resolves who you are from the Bearer token, which is what
  *     closed the IDOR hole.
@@ -12,7 +12,7 @@
 (function (global) {
   'use strict';
 
-  const API_BASE = (global.COGNIDIFF_API_BASE) || 'http://localhost:8000';
+  const API_BASE = (global.COGNIDIFF_API_BASE) || 'http://localhost:8001';
   const TOKEN_KEY = 'cognidiff.token';
   const USER_KEY = 'cognidiff.user';
 
@@ -55,7 +55,7 @@
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch (err) {
-      throw new ApiError(0, 'Cannot reach the CogniDiff API. Is the backend running on port 8000?');
+      throw new ApiError(0, 'Cannot reach the CogniDiff API. Is the backend running on port 8001?');
     }
 
     if (res.status === 401 && auth) {
